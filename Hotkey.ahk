@@ -1,5 +1,5 @@
 
-	;  http://forum.script-coding.com/viewtopic.php?id=8343
+	;  http://forum.script-coding.com/viewtopic.php?pid=97390#p97390
 
 Hotkey_Register(Handles) {
 	Static IsStart
