@@ -1,5 +1,5 @@
 
-	;  http://forum.script-coding.com/viewtopic.php?pid=97390#p97390
+	;  http://forum.script-coding.com/viewtopic.php?id=8343
 
 Hotkey_Register(Handles) {
 	Static IsStart
@@ -232,9 +232,9 @@ Hotkey_HKToStr(Key) {
 			. (StrLen(KeyName) = 1 ? Format("{:U}", KeyName) : KeyName)
 }
 
-Hotkey_HKToSend(Key, Section = "", Path = "") {
+Hotkey_HKToSend(Key, Section = "", FilePath = "") {
 	Local Data
 	If (Section != "")
-		IniRead, Data, % Path, % Section, % Key, % A_Space
+		IniRead, Data, % FilePath, % Section, % Key, % A_Space
 	Return RegExReplace(Data, "S)[^\^!\+#].*", "{$0}")
 }
