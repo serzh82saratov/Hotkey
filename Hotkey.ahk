@@ -1,12 +1,13 @@
 
-	;  http://forum.script-coding.com/viewtopic.php?id=8343
+	;  http://forum.script-coding.com/viewtopic.php?pid=72549#p72549
 
-Hotkey_Register(Handles) {
+Hotkey_Register(Controls) {
 	Static IsStart
-	Loop, Parse, Handles, `,,%A_Space%%A_Tab%
+	Local Name, Handle
+	For Name, Handle in Controls
 	{
-		Hotkey_("Name", %A_LoopField%, A_LoopField)
-		GuiControl, +ReadOnly, % %A_LoopField%
+		Hotkey_Controls("Name", Handle, Name)
+		GuiControl, +ReadOnly, % Handle
 	}
 	If IsStart
 		Return
@@ -16,32 +17,34 @@ Hotkey_Register(Handles) {
 }
 
 Hotkey_Main(Param1, Param2=0) {
-	Static OnlyMods, ControlHandle, Hotkey, KeyName
-		, MCtrl, MAlt, MShift, MWin, PCtrl, PAlt, PShift, PWin, Prefix
-		, Pref := {"Alt":"!","Ctrl":"^","Shift":"+","Win":"#"}
+	Static OnlyMods, ControlHandle, Hotkey, KeyName, K := {}
+		, Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
+				,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"
+				,"Alt":"!","Ctrl":"^","Shift":"+","Win":"#"}
 		, Symbols := "|vkBA|vkBB|vkBC|vkBD|vkBE|vkBF|vkC0|vkDB|vkDC|vkDD|vkDE|vk41|vk42|"
 					. "vk43|vk44|vk45|vk46|vk47|vk48|vk49|vk4A|vk4B|vk4C|vk4D|vk4E|"
 					. "vk4F|vk50|vk51|vk52|vk53|vk54|vk55|vk56|vk57|vk58|vk59|vk5A|"
-	Local IsMod, WriteText
+	Local IsMod, Text
 
 	If Param1 = GetMod
-		Return MCtrl MAlt MShift MWin = "" ? 0 : 1
+		Return K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	If Param1 = Control
 	{
 		If Param2
 		{
 			If OnlyMods
+			{
 				SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
-			OnlyMods := 0, ControlHandle := Param2
+				OnlyMods := 0, K := {}
+			}
+			ControlHandle := Param2
 			If !Hotkey_Arr("Hook")
 				Hotkey_Arr("Hook", 1)
 			PostMessage, 0x00B1, -1, -1, , ahk_id %ControlHandle%   ;  EM_SETSEL
 		}
 		Else If Hotkey_Arr("Hook")
 		{
-			Hotkey_Arr("Hook", 0)
-			MCtrl := MAlt := MShift := MWin := ""
-			PCtrl := PAlt := PShift := PWin := Prefix := ""
+			Hotkey_Arr("Hook", 0), K := {}
 			If OnlyMods
 				SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
 		}
@@ -49,83 +52,43 @@ Hotkey_Main(Param1, Param2=0) {
 	}
 	If Param1 = Mod
 	{
-		IsMod := Param2
-		If (M%IsMod% != "")
+		IsMod := Hotkey_Arr("LRMods") ? Param2 : SubStr(Param2, 2)
+		If (K["M" IsMod] != "")
 			Return 1
-		M%IsMod% := IsMod "+", P%IsMod% := Pref[IsMod]
+		K["M" IsMod] := IsMod "+", K["P" IsMod] := Prefix[IsMod]
 	}
 	Else If Param1 = ModUp
 	{
-		IsMod := Param2, M%IsMod% := P%IsMod% := ""
+		IsMod := Hotkey_Arr("LRMods") ? Param2 : SubStr(Param2, 2)
+		K["M" IsMod] := "", K["P" IsMod] := ""
 		If (Hotkey != "")
 			Return 1
 	}
-	(IsMod) ? (KeyName := Hotkey := Prefix := "", OnlyMods := 1)
-	: (KeyName := GetKeyName(Param1 Param2)
+	(IsMod) ? (KeyName := Hotkey := K.Prefix := "", OnlyMods := 1)
+	: (KeyName := GetKeyName(Param1 Param2), OnlyMods := 0
 	, (StrLen(KeyName) = 1 ? (KeyName := Format("{:U}", KeyName)) : 0)
 	, Hotkey := InStr(Symbols, "|" Param1 "|") ? Param1 : KeyName
 	, KeyName := Hotkey = "vkBF" ? "/" : KeyName
-	, Prefix := PCtrl PAlt PShift PWin, OnlyMods := 0)
-	Hotkey_("Value", Hotkey_("Name", ControlHandle), Prefix Hotkey)
-	WriteText := MCtrl MAlt MShift MWin KeyName = "" ? Hotkey_Arr("Empty") : MCtrl MAlt MShift MWin KeyName
-	SendMessage, 0xC, 0, &WriteText, , ahk_id %ControlHandle%
+	, K.Prefix := K.PLCtrl K.PRCtrl K.PLAlt K.PRAlt K.PLShift K.PRShift K.PLWin K.PRWin K.PCtrl K.PAlt K.PShift K.PWin)
+	Hotkey_Controls("Value", Hotkey_Name(ControlHandle), K.Prefix Hotkey)
+	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
+	Text := K.Mods KeyName = "" ? Hotkey_Arr("Empty") : K.Mods KeyName
+	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
 	Return 1
 
 Hotkey_PressName:
-	KeyName := Hotkey := A_ThisHotkey
-	Prefix := PCtrl PAlt PShift PWin
-	OnlyMods := 0
-	Hotkey_("Value", Hotkey_("Name", ControlHandle), Prefix Hotkey)
-	WriteText := MCtrl MAlt MShift MWin KeyName
-	SendMessage, 0xC, 0, &WriteText, , ahk_id %ControlHandle%
+	KeyName := Hotkey := A_ThisHotkey, OnlyMods := 0
+	K.Prefix := K.PLCtrl K.PRCtrl K.PLAlt K.PRAlt K.PLShift K.PRShift K.PLWin K.PRWin K.PCtrl K.PAlt K.PShift K.PWin
+	Hotkey_Controls("Value", Hotkey_Name(ControlHandle), K.Prefix Hotkey)
+	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
+	Text := K.Mods KeyName
+	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
 	Return
 }
 
-Hotkey_WinEvent(hWinEventHook, event, hwnd) {
-	Hotkey_("Name", hwnd) != "" ? Hotkey_Main("Control", hwnd) : Hotkey_Main("Control")
-}
-
-Hotkey_Option(Options) {
-	Local S_FormatInteger, MouseKey
-	#IF Hotkey_Arr("Hook")
-	#IF Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
-	#IF Hotkey_Arr("Hook") && !Hotkey_Main("GetMod")
-	#IF
-	IfInString, Options, M
-	{
-		MouseKey := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
-		Hotkey, IF, Hotkey_Arr("Hook")
-		Loop, Parse, MouseKey, |
-			Hotkey, %A_LoopField%, Hotkey_PressName
-	}
-	IfInString, Options, J
-	{
-		S_FormatInteger := A_FormatInteger
-		SetFormat, IntegerFast, D
-		Hotkey, IF, Hotkey_Arr("Hook") && !Hotkey_Main("GetMod")
-		Loop, 128
-			Hotkey % Ceil(A_Index/32) "Joy" Mod(A_Index-1,32)+1, Hotkey_PressName
-		SetFormat, IntegerFast, %S_FormatInteger%
-	}
-	IfInString, Options, L
-	{
-		Hotkey, IF, Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
-		Hotkey, LButton, Hotkey_PressName
-	}
-	IfInString, Options, R
-	{
-		Hotkey, IF, Hotkey_Arr("Hook")
-		Hotkey, RButton, Hotkey_PressName
-		Hotkey_RButton(1)
-	}
-	Else
-		Hotkey_RButton(0)
-	Hotkey, IF
-}
-
 Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
-	Static Mods := {"vkA4":"Alt","vkA5":"Alt","vkA2":"Ctrl","vkA3":"Ctrl"
-		,"vkA0":"Shift","vkA1":"Shift","vk5B":"Win","vk5C":"Win"}
+	Static Mods := {"vkA4":"LAlt","vkA5":"RAlt","vkA2":"LCtrl","vkA3":"RCtrl"
+		,"vkA0":"LShift","vkA1":"RShift","vk5B":"LWin","vk5C":"RWin"}
 		, oMem := [], HEAP_ZERO_MEMORY := 0x8, Size := 16, hHeap := DllCall("GetProcessHeap", Ptr)
 	Local pHeap, Wp, Lp, Ext, VK, SC, IsMod
 	Critical
@@ -158,37 +121,44 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 		Return
 }
 
-Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, idProcess, idThread, dwFlags) {
-	Return DllCall("SetWinEventHook" , "UInt", eventMin, "UInt", eventMax, "Ptr", hmodWinEventProc
-			, "Ptr", lpfnWinEventProc, "UInt", idProcess, "UInt", idThread, "UInt", dwFlags, "Ptr")
-}
-
-Hotkey_SetWindowsHookEx() {
-	Return DllCall("SetWindowsHookEx" . (A_IsUnicode ? "W" : "A")
-		, "Int", 13   ;  WH_KEYBOARD_LL := 13
-		, "Ptr", RegisterCallback("Hotkey_LowLevelKeyboardProc", "Fast")
-		, "Ptr", DllCall("GetModuleHandle", "UInt", 0, "Ptr")
-		, "UInt", 0, "Ptr")
-}
-
-Hotkey_Exit() {
-	DllCall("UnhookWindowsHookEx", "Ptr", Hotkey_Arr("hHook"))
-}
-
-Hotkey_Arr(P*) {
-	Static Arr := {Empty:"Нет"}
-	Return P.MaxIndex() = 1 ? Arr[P[1]] : (Arr[P[1]] := P[2])
-}
-
-Hotkey_(Type, P*) {
-	Static ArrName := [], ArrValue := {}
-	Return P.MaxIndex() = 1 ? Arr%Type%[P[1]] : (Arr%Type%[P[1]] := P[2])
-}
-
-Hotkey_IsRegControl() {
-	Local Control
-	MouseGetPos,,,, Control, 2
-	Return Hotkey_("Name", Control) != ""
+Hotkey_Option(Options) {
+	Local S_FormatInteger, MouseKey
+	#IF Hotkey_Arr("Hook")
+	#IF Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
+	#IF Hotkey_Arr("Hook") && !Hotkey_Main("GetMod")
+	#IF
+	IfInString, Options, M
+	{
+		MouseKey := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
+		Hotkey, IF, Hotkey_Arr("Hook")
+		Loop, Parse, MouseKey, |
+			Hotkey, %A_LoopField%, Hotkey_PressName
+	}
+	IfInString, Options, L
+	{
+		Hotkey, IF, Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
+		Hotkey, LButton, Hotkey_PressName
+	}
+	IfInString, Options, R
+	{
+		Hotkey, IF, Hotkey_Arr("Hook")
+		Hotkey, RButton, Hotkey_PressName
+		Hotkey_RButton(1)
+	}
+	Else
+		Hotkey_RButton(0)
+	IfInString, Options, J
+	{
+		S_FormatInteger := A_FormatInteger
+		SetFormat, IntegerFast, D
+		Hotkey, IF, Hotkey_Arr("Hook") && !Hotkey_Main("GetMod")
+		Loop, 128
+			Hotkey % Ceil(A_Index/32) "Joy" Mod(A_Index-1,32)+1, Hotkey_PressName
+		SetFormat, IntegerFast, %S_FormatInteger%
+	}
+	IfInString, Options, H
+		Hotkey_Arr("LRMods", 1)
+	Hotkey, IF
 }
 
 Hotkey_RButton(RM) {
@@ -208,33 +178,95 @@ Hotkey_RButton(RM) {
 		Return
 }
 
-	; -------------------------------------- Format func --------------------------------------
+Hotkey_IsRegControl() {
+	Local Control
+	MouseGetPos,,,, Control, 2
+	Return Hotkey_Name(Control) != ""
+}
 
-Hotkey_Get(Key, Section="", FilePath="") {
+Hotkey_WinEvent(hWinEventHook, event, hwnd) {
+	Hotkey_Name(hwnd) != "" ? Hotkey_Main("Control", hwnd) : Hotkey_Main("Control")
+}
+
+Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, idProcess, idThread, dwFlags) {
+	Return DllCall("SetWinEventHook" , "UInt", eventMin, "UInt", eventMax, "Ptr", hmodWinEventProc
+			, "Ptr", lpfnWinEventProc, "UInt", idProcess, "UInt", idThread, "UInt", dwFlags, "Ptr")
+}
+
+Hotkey_SetWindowsHookEx() {
+	Return DllCall("SetWindowsHookEx" . (A_IsUnicode ? "W" : "A")
+		, "Int", 13   ;  WH_KEYBOARD_LL := 13
+		, "Ptr", RegisterCallback("Hotkey_LowLevelKeyboardProc", "Fast")
+		, "Ptr", DllCall("GetModuleHandle", "UInt", 0, "Ptr")
+		, "UInt", 0, "Ptr")
+}
+
+Hotkey_Exit() {
+	DllCall("UnhookWindowsHookEx", "Ptr", Hotkey_Arr("hHook"))
+}
+
+	; -------------------------------------- Save and get variables --------------------------------------
+
+Hotkey_Arr(P*) {
+	Static Arr := {Empty:"Нет"}
+	Return P.MaxIndex() = 1 ? Arr[P[1]] : (Arr[P[1]] := P[2])
+}
+
+Hotkey_Controls(Type, P*) {
+	Static ArrName := [], ArrValue := {}
+	Return P.MaxIndex() = 1 ? Arr%Type%[P[1]] : (Arr%Type%[P[1]] := P[2])
+}
+
+Hotkey_Name(Hwnd) {
+	Return Hotkey_Controls("Name", Hwnd)
+}
+
+Hotkey_Ini() {
+	Return Hotkey_Arr("IniFile")
+}
+
+Hotkey_Value(Name) {
+	Return Hotkey_Controls("Value", Name)
+}
+
+	; -------------------------------------- Read and format --------------------------------------
+
+Hotkey_Read(Key, Section, FilePath = "") {
 	Local Data
-	If FilePath =
-		Return Hotkey_("Value", Key)
-	IniRead, Data, % FilePath, % Section, % Key, % A_Space
-	Return Hotkey_HKToStr(Data), Hotkey_("Value", Key, Data)
+	IniRead, Data, % FilePath = "" ? Hotkey_Ini() : FilePath, % Section, % Key, % A_Space
+	Return Hotkey_HKToStr(Data), Hotkey_Controls("Value", Key, Data)
 }
 
 Hotkey_HKToStr(Key) {
-	Local K, K1, K2, KeyName
-	RegExMatch(Key, "S)^([\^\+!#]*)\{?(.*?)}?$", K)
+	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
+					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
+			, Prefix := [["^","Ctrl"],["!","Alt"],["+","Shift"],["#","Win"]]
+	Local K, K1, K2, I, V, M, R
+	RegExMatch(Key, "S)^([\^\+!#<>]*)\{?(.*?)}?$", K)
 	If (K2 = "")
 		Return "" Hotkey_Arr("Empty")
-	If InStr(K2, "vk")
-		KeyName := K2 = "vkBF" ? "/" : GetKeyName(K2)
-	Else
-		KeyName := K2
-	Return (InStr(K1,"^")?"Ctrl+":"")(InStr(K1,"!")?"Alt+":"")
-			. (InStr(K1,"+")?"Shift+":"")(InStr(K1,"#")?"Win+":"")
-			. (StrLen(KeyName) = 1 ? Format("{:U}", KeyName) : KeyName)
+	If K2 ~= "^vk"
+		K2 := K2 = "vkBF" ? "/" : Format("{:U}", GetKeyName(K2))
+	If (K1 != "")
+		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
+			K1 := RegExReplace(K1, "\Q" V[1] "\E", "", R)
+			, R ? (M .= V[2] "+") : 0
+	Return M . K2
 }
 
 Hotkey_HKToSend(Key, Section = "", FilePath = "") {
-	Local Data
+	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
+					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
+		, Prefix := [["^","LCtrl"],["!","LAlt"],["+","LShift"],["#","LWin"]]
+	Local K, K1, K2, I, V, M1, M2, R
 	If (Section != "")
-		IniRead, Data, % FilePath, % Section, % Key, % A_Space
-	Return RegExReplace(Data, "S)[^\^!\+#].*", "{$0}")
+		IniRead, Key, % FilePath = "" ? Hotkey_Ini() : FilePath, % Section, % Key, % A_Space
+	If (Key = "")
+		Return
+	RegExMatch(Key, "S)^([\^\+!#<>]*)\{?(.*?)}?$", K)
+	If (K1 != "")
+		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
+			K1 := RegExReplace(K1, "\Q" V[1] "\E", "", R)
+			, R ? (M1 .= "{" V[2] " Down}", M2 .= "{" V[2] " Up}") : 0
+	Return M1 . "{" K2 "}" . M2
 }
