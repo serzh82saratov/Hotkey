@@ -12,7 +12,7 @@ Hotkey_Register(Controls) {
 	If IsStart
 		Return
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_WinEvent", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
-	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx())
+	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), Hotkey_RButton()
 	Return IsStart := 1
 }
 
@@ -143,10 +143,8 @@ Hotkey_Option(Options) {
 	{
 		Hotkey, IF, Hotkey_Arr("Hook")
 		Hotkey, RButton, Hotkey_PressName
-		Hotkey_RButton(1)
+		Hotkey_Arr("SetRButton", 1)
 	}
-	Else
-		Hotkey_RButton(0)
 	IfInString, Options, J
 	{
 		S_FormatInteger := A_FormatInteger
@@ -161,14 +159,12 @@ Hotkey_Option(Options) {
 	Hotkey, IF
 }
 
-Hotkey_RButton(RM) {
+Hotkey_RButton() {
+	If Hotkey_Arr("SetRButton")
+		Return
 	#IF Hotkey_IsRegControl()
-	#IF !Hotkey_Arr("Hook") && Hotkey_IsRegControl()
 	#IF
-	If RM
-		Hotkey, IF, !Hotkey_Arr("Hook") && Hotkey_IsRegControl()
-	Else
-		Hotkey, IF, Hotkey_IsRegControl()
+	Hotkey, IF, Hotkey_IsRegControl()
 	Hotkey, RButton Up, Hotkey_RButton
 	Hotkey, IF
 	Return
@@ -221,12 +217,12 @@ Hotkey_Name(Hwnd) {
 	Return Hotkey_Controls("Name", Hwnd)
 }
 
-Hotkey_Ini() {
-	Return Hotkey_Arr("IniFile")
-}
-
 Hotkey_Value(Name) {
 	Return Hotkey_Controls("Value", Name)
+}
+
+Hotkey_Ini() {
+	Return Hotkey_Arr("IniFile")
 }
 
 	; -------------------------------------- Read and format --------------------------------------
