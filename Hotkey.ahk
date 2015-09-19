@@ -232,25 +232,35 @@ Hotkey_HwndFromName(Name) {
 	Return Hotkey_Controls("HwndFromName", Name)
 }
 
-Hotkey_Ini() {
-	Return Hotkey_Arr("IniFile")
+Hotkey_IniPath() {
+	Return Hotkey_Arr("IniPath")
+}
+
+Hotkey_IniSection() {
+	Return Hotkey_Arr("IniSection")
 }
 
 Hotkey_Set(Name, Value="") {
-	Local Data
-	Data := Hotkey_Controls("ValueFromName", Name, Value)
-	Data := Hotkey_HKToStr(Data)
-	If Data =
-		Data := Hotkey_Arr("Empty")
-	Return Data
+	Hotkey_Controls("ValueFromName", Name, Value)
+	Return Hotkey_HKToStr(Value)
+}
+
+Hotkey_IniWrite(Hwnd, Section = "", FilePath = "") {
+	IniWrite, % Hotkey_Value(Hwnd), % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Hotkey_Name(Hwnd)
 }
 
 	; -------------------------------------- Read and format --------------------------------------
 
-Hotkey_Read(Key, Section, FilePath = "") {
+Hotkey_Read(Key, Section = "", FilePath = "") {
 	Local Data
-	IniRead, Data, % FilePath = "" ? Hotkey_Ini() : FilePath, % Section, % Key, % A_Space
+	IniRead, Data, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Key, % A_Space
 	Return Hotkey_HKToStr(Data), Hotkey_Controls("ValueFromName", Key, Data)
+}
+
+Hotkey_IniRead(Key, Section = "", FilePath = "") {
+	Local Data
+	IniRead, Data, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Key, % A_Space
+	Return Data
 }
 
 Hotkey_HKToStr(Key) {
@@ -276,7 +286,7 @@ Hotkey_HKToSend(Key, Section = "", FilePath = "") {
 	, Prefix := [["^","LCtrl"],["!","LAlt"],["+","LShift"],["#","LWin"]]
 	Local K, K1, K2, I, V, M1, M2, R
 	If (Section != "")
-		IniRead, Key, % FilePath = "" ? Hotkey_Ini() : FilePath, % Section, % Key, % A_Space
+		IniRead, Key, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Key, % A_Space
 	If (Key = "")
 		Return
 	RegExMatch(Key, "S)^([\^\+!#<>]*)\{?(.*?)}?$", K)
