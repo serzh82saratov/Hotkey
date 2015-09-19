@@ -7,6 +7,7 @@ Hotkey_Register(Controls) {
 	For Name, Handle in Controls
 	{
 		Hotkey_Controls("Name", Handle, Name)
+		Hotkey_Controls("HwndFromName", Name, Handle)
 		GuiControl, +ReadOnly, % Handle
 	}
 	If IsStart
@@ -18,12 +19,12 @@ Hotkey_Register(Controls) {
 
 Hotkey_Main(Param1, Param2=0) {
 	Static OnlyMods, ControlHandle, Hotkey, KeyName, K := {}
-		, Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
+	, Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
 				,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"
 				,"Alt":"!","Ctrl":"^","Shift":"+","Win":"#"}
-		, Symbols := "|vkBA|vkBB|vkBC|vkBD|vkBE|vkBF|vkC0|vkDB|vkDC|vkDD|vkDE|vk41|vk42|"
-					. "vk43|vk44|vk45|vk46|vk47|vk48|vk49|vk4A|vk4B|vk4C|vk4D|vk4E|"
-					. "vk4F|vk50|vk51|vk52|vk53|vk54|vk55|vk56|vk57|vk58|vk59|vk5A|"
+	, Symbols := "|vkBA|vkBB|vkBC|vkBD|vkBE|vkBF|vkC0|vkDB|vkDC|vkDD|vkDE|vk41|vk42|"
+				. "vk43|vk44|vk45|vk46|vk47|vk48|vk49|vk4A|vk4B|vk4C|vk4D|vk4E|"
+				. "vk4F|vk50|vk51|vk52|vk53|vk54|vk55|vk56|vk57|vk58|vk59|vk5A|"
 	Local IsMod, Text
 
 	If Param1 = GetMod
@@ -48,7 +49,7 @@ Hotkey_Main(Param1, Param2=0) {
 			If OnlyMods
 				SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
 		}
-		Return
+		Return 1
 	}
 	If Param1 = Mod
 	{
@@ -70,7 +71,8 @@ Hotkey_Main(Param1, Param2=0) {
 	, Hotkey := InStr(Symbols, "|" Param1 "|") ? Param1 : KeyName
 	, KeyName := Hotkey = "vkBF" ? "/" : KeyName
 	, K.Prefix := K.PLCtrl K.PRCtrl K.PLAlt K.PRAlt K.PLShift K.PRShift K.PLWin K.PRWin K.PCtrl K.PAlt K.PShift K.PWin)
-	Hotkey_Controls("Value", Hotkey_Name(ControlHandle), K.Prefix Hotkey)
+	Hotkey_Controls("ValueFromName", Hotkey_Name(ControlHandle), K.Prefix Hotkey)
+	Hotkey_Controls("Value", ControlHandle, K.Prefix Hotkey)
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	Text := K.Mods KeyName = "" ? Hotkey_Arr("Empty") : K.Mods KeyName
 	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
@@ -79,7 +81,8 @@ Hotkey_Main(Param1, Param2=0) {
 Hotkey_PressName:
 	KeyName := Hotkey := A_ThisHotkey, OnlyMods := 0
 	K.Prefix := K.PLCtrl K.PRCtrl K.PLAlt K.PRAlt K.PLShift K.PRShift K.PLWin K.PRWin K.PCtrl K.PAlt K.PShift K.PWin
-	Hotkey_Controls("Value", Hotkey_Name(ControlHandle), K.Prefix Hotkey)
+	Hotkey_Controls("ValueFromName", Hotkey_Name(ControlHandle), K.Prefix Hotkey)
+	Hotkey_Controls("Value", ControlHandle, K.Prefix Hotkey)
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	Text := K.Mods KeyName
 	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
@@ -209,7 +212,7 @@ Hotkey_Arr(P*) {
 }
 
 Hotkey_Controls(Type, P*) {
-	Static ArrName := [], ArrValue := {}
+	Static ArrName := [], ArrValue := [], ArrValueFromName := {}, ArrHwndFromName := []
 	Return P.MaxIndex() = 1 ? Arr%Type%[P[1]] : (Arr%Type%[P[1]] := P[2])
 }
 
@@ -217,8 +220,16 @@ Hotkey_Name(Hwnd) {
 	Return Hotkey_Controls("Name", Hwnd)
 }
 
-Hotkey_Value(Name) {
-	Return Hotkey_Controls("Value", Name)
+Hotkey_Value(Hwnd) {
+	Return Hotkey_Controls("Value", Hwnd)
+}
+
+Hotkey_ValueFromName(Name) {
+	Return Hotkey_Controls("ValueFromName", Name)
+}
+
+Hotkey_HwndFromName(Name) {
+	Return Hotkey_Controls("HwndFromName", Name)
 }
 
 Hotkey_Ini() {
@@ -230,13 +241,13 @@ Hotkey_Ini() {
 Hotkey_Read(Key, Section, FilePath = "") {
 	Local Data
 	IniRead, Data, % FilePath = "" ? Hotkey_Ini() : FilePath, % Section, % Key, % A_Space
-	Return Hotkey_HKToStr(Data), Hotkey_Controls("Value", Key, Data)
+	Return Hotkey_HKToStr(Data), Hotkey_Controls("ValueFromName", Key, Data)
 }
 
 Hotkey_HKToStr(Key) {
 	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
 					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
-			, Prefix := [["^","Ctrl"],["!","Alt"],["+","Shift"],["#","Win"]]
+	, Prefix := [["^","Ctrl"],["!","Alt"],["+","Shift"],["#","Win"]]
 	Local K, K1, K2, I, V, M, R
 	RegExMatch(Key, "S)^([\^\+!#<>]*)\{?(.*?)}?$", K)
 	If (K2 = "")
@@ -253,7 +264,7 @@ Hotkey_HKToStr(Key) {
 Hotkey_HKToSend(Key, Section = "", FilePath = "") {
 	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
 					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
-		, Prefix := [["^","LCtrl"],["!","LAlt"],["+","LShift"],["#","LWin"]]
+	, Prefix := [["^","LCtrl"],["!","LAlt"],["+","LShift"],["#","LWin"]]
 	Local K, K1, K2, I, V, M1, M2, R
 	If (Section != "")
 		IniRead, Key, % FilePath = "" ? Hotkey_Ini() : FilePath, % Section, % Key, % A_Space
