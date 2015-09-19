@@ -114,9 +114,9 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 				SC := Format("sc{:X}", (Ext & 1) << 8 | NumGet(Lp + 0, 4, "UInt"))
 				IsMod := Mods[VK]
 				If (Wp = 0x100 || Wp = 0x104)		;  WM_KEYDOWN := 0x100, WM_SYSKEYDOWN := 0x104
-					(IsMod := Mods[VK]) ? Hotkey_Main("Mod", IsMod) : Hotkey_Main(VK, SC)
+					IsMod ? Hotkey_Main("Mod", IsMod) : Hotkey_Main(VK, SC)
 				Else IF ((Wp = 0x101 || Wp = 0x105) && VK != "vk5D")   ;  WM_KEYUP := 0x101, WM_SYSKEYUP := 0x105, AppsKey = "vk5D"
-					(IsMod := Mods[VK]) ? Hotkey_Main("ModUp", IsMod) : 0
+					IsMod ? Hotkey_Main("ModUp", IsMod) : 0
 			}
 			DllCall("HeapFree", Ptr, hHeap, UInt, 0, Ptr, Lp)
 			oMem.RemoveAt(1)
@@ -234,6 +234,15 @@ Hotkey_HwndFromName(Name) {
 
 Hotkey_Ini() {
 	Return Hotkey_Arr("IniFile")
+}
+
+Hotkey_Set(Name, Value="") {
+	Local Data
+	Data := Hotkey_Controls("ValueFromName", Name, Value)
+	Data := Hotkey_HKToStr(Data)
+	If Data =
+		Data := Hotkey_Arr("Empty")
+	Return Data
 }
 
 	; -------------------------------------- Read and format --------------------------------------
