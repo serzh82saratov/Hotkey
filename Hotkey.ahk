@@ -232,12 +232,12 @@ Hotkey_HwndFromName(Name) {
 	Return Hotkey_Controls("HwndFromName", Name)
 }
 
-Hotkey_IniPath() {
-	Return Hotkey_Arr("IniPath")
+Hotkey_IniPath(Path = "") {
+	Return Path = "" ? Hotkey_Arr("IniPath") : Hotkey_Arr("IniPath", Path)
 }
 
-Hotkey_IniSection() {
-	Return Hotkey_Arr("IniSection")
+Hotkey_IniSection(Section = "") {
+	Return Section = "" ? Hotkey_Arr("IniSection") : Hotkey_Arr("IniSection", Section)
 }
 
 Hotkey_Set(Name, Value="") {
