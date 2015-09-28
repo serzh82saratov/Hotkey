@@ -12,6 +12,7 @@ Hotkey_Register(Controls) {
 	}
 	If IsStart
 		Return
+	#HotkeyInterval 0
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_WinEvent", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
 	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), Hotkey_RButton()
 	Return IsStart := 1
