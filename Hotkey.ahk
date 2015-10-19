@@ -49,6 +49,7 @@ Hotkey_Main(Param1, Param2=0) {
 			Hotkey_Arr("Hook", 0), K := {}
 			If OnlyMods
 				SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
+			SetTimer, Hotkey_IsRegFocus, -200
 		}
 		Return 1
 	}
@@ -93,14 +94,14 @@ Hotkey_PressName:
 Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 	Static Mods := {"vkA4":"LAlt","vkA5":"RAlt","vkA2":"LCtrl","vkA3":"RCtrl"
 		,"vkA0":"LShift","vkA1":"RShift","vk5B":"LWin","vk5C":"RWin"}
-		, oMem := [], HEAP_ZERO_MEMORY := 0x8, Size := 16, hHeap := DllCall("GetProcessHeap", Ptr)
+		, oMem := [], HEAP_ZERO_MEMORY := 0x8, Size := 16, hHeap := DllCall("GetProcessHeap", "Ptr")
 	Local pHeap, Wp, Lp, Ext, VK, SC, IsMod
 	Critical
 
 	If !Hotkey_Arr("Hook")
 		Return DllCall("CallNextHookEx", "Ptr", 0, "Int", nCode, "UInt", wParam, "UInt", lParam)
-	pHeap := DllCall("HeapAlloc", Ptr, hHeap, UInt, HEAP_ZERO_MEMORY, Ptr, Size, Ptr)
-	DllCall("RtlMoveMemory", Ptr, pHeap, Ptr, lParam, Ptr, Size), oMem.Push([wParam, pHeap])
+	pHeap := DllCall("HeapAlloc", "Ptr", hHeap, "UInt", HEAP_ZERO_MEMORY, "Ptr", Size, "Ptr")
+	DllCall("RtlMoveMemory", "Ptr", pHeap, "Ptr", lParam, "Ptr", Size), oMem.Push([wParam, pHeap])
 	SetTimer, Hotkey_LLKPWork, -10
 	Return nCode < 0 ? DllCall("CallNextHookEx", "Ptr", 0, "Int", nCode, "UInt", wParam, "UInt", lParam) : 1
 
@@ -119,7 +120,7 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 				Else IF ((Wp = 0x101 || Wp = 0x105) && VK != "vk5D")   ;  WM_KEYUP := 0x101, WM_SYSKEYUP := 0x105, AppsKey = "vk5D"
 					IsMod ? Hotkey_Main("ModUp", IsMod) : 0
 			}
-			DllCall("HeapFree", Ptr, hHeap, UInt, 0, Ptr, Lp)
+			DllCall("HeapFree", "Ptr", hHeap, "UInt", 0, "Ptr", Lp)
 			oMem.RemoveAt(1)
 		}
 		Return
@@ -182,6 +183,14 @@ Hotkey_IsRegControl() {
 	Local Control
 	MouseGetPos,,,, Control, 2
 	Return Hotkey_Name(Control) != ""
+}
+
+Hotkey_IsRegFocus() {
+	Local ControlNN, hFocus
+	WinExist("A")
+	ControlGetFocus, ControlNN
+	ControlGet, hFocus, Hwnd, , %ControlNN%
+	Hotkey_Name(hFocus) != "" ? Hotkey_Arr("Hook", 1) : 0
 }
 
 Hotkey_WinEvent(hWinEventHook, event, hwnd) {
