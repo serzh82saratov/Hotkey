@@ -23,9 +23,15 @@ Hotkey_Main(Param1, Param2=0) {
 	, Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
 				,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"
 				,"Alt":"!","Ctrl":"^","Shift":"+","Win":"#"}
-	, Symbols := "|vkBA|vkBB|vkBC|vkBD|vkBE|vkBF|vkC0|vkDB|vkDC|vkDD|vkDE|vk41|vk42|"
+ 	, Symbols := "|vkBA|vkBB|vkBC|vkBD|vkBE|vkBF|vkC0|vkDB|vkDC|vkDD|vkDE|vk41|vk42|"
 				. "vk43|vk44|vk45|vk46|vk47|vk48|vk49|vk4A|vk4B|vk4C|vk4D|vk4E|"
 				. "vk4F|vk50|vk51|vk52|vk53|vk54|vk55|vk56|vk57|vk58|vk59|vk5A|"
+	, EngSym := {"vkBB":"=","vkBC":",","vkBD":"-","vkBE":".","vkBF":"/","vkC0":"``","vkBA":"`;"
+				,"vkDB":"[","vkDC":"\","vkDD":"]","vkDE":"'","vk41":"A","vk42":"B","vk43":"C"
+				,"vk44":"D","vk45":"E","vk46":"F","vk47":"G","vk48":"H","vk49":"I","vk4A":"J"
+				,"vk4B":"K","vk4C":"L","vk4D":"M","vk4E":"N","vk4F":"O","vk50":"P","vk51":"Q"
+				,"vk52":"R","vk53":"S","vk54":"T","vk55":"U","vk56":"V","vk57":"W","vk58":"X"
+				,"vk59":"Y","vk5A":"Z"}
 	Local IsMod, Text
 
 	If Param1 = GetMod
@@ -72,6 +78,7 @@ Hotkey_Main(Param1, Param2=0) {
 	, (StrLen(KeyName) = 1 ? (KeyName := Format("{:U}", KeyName)) : 0)
 	, Hotkey := InStr(Symbols, "|" Param1 "|") ? Param1 : KeyName
 	, KeyName := Hotkey = "vkBF" ? "/" : KeyName
+	, (Hotkey_Arr("OnlyEngSym") && Hotkey != KeyName ? (KeyName := EngSym[Param1]) : 0)
 	, K.Prefix := K.PLCtrl K.PRCtrl K.PLAlt K.PRAlt K.PLShift K.PRShift K.PLWin K.PRWin K.PCtrl K.PAlt K.PShift K.PWin)
 	Hotkey_Controls("ValueFromName", Hotkey_Name(ControlHandle), K.Prefix Hotkey)
 	Hotkey_Controls("Value", ControlHandle, K.Prefix Hotkey)
@@ -168,6 +175,8 @@ Hotkey_Option(Options) {
 		Hotkey_Arr("SingleKey", 1)
 	IfInString, Options, H
 		Hotkey_Arr("LRMods", 1)
+	IfInString, Options, E
+		Hotkey_Arr("OnlyEngSym", 1)
 	Hotkey, IF
 }
 
@@ -285,12 +294,18 @@ Hotkey_HKToStr(Key) {
 	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
 					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
 	, Prefix := [["^","Ctrl"],["!","Alt"],["+","Shift"],["#","Win"]]
+	, EngSym := {"vkBB":"=","vkBC":",","vkBD":"-","vkBE":".","vkBF":"/","vkC0":"``","vkBA":"`;"
+				,"vkDB":"[","vkDC":"\","vkDD":"]","vkDE":"'","vk41":"A","vk42":"B","vk43":"C"
+				,"vk44":"D","vk45":"E","vk46":"F","vk47":"G","vk48":"H","vk49":"I","vk4A":"J"
+				,"vk4B":"K","vk4C":"L","vk4D":"M","vk4E":"N","vk4F":"O","vk50":"P","vk51":"Q"
+				,"vk52":"R","vk53":"S","vk54":"T","vk55":"U","vk56":"V","vk57":"W","vk58":"X"
+				,"vk59":"Y","vk5A":"Z"}
 	Local K, K1, K2, I, V, M, R
 	RegExMatch(Key, "S)^([\^\+!#<>]*)\{?(.*?)}?$", K)
 	If (K2 = "")
 		Return "" Hotkey_Arr("Empty")
 	If K2 ~= "^vk"
-		K2 := K2 = "vkBF" ? "/" : Format("{:U}", GetKeyName(K2))
+		K2 := K2 = "vkBF" ? "/" : (Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : Format("{:U}", GetKeyName(K2)))
 	If (K1 != "")
 		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
 			K1 := RegExReplace(K1, "\Q" V[1] "\E", "", R)
