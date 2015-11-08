@@ -130,8 +130,9 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 Hotkey_Option(Options) {
 	Local S_FormatInteger, MouseKey
 	#IF Hotkey_Arr("Hook")
-	#IF Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
 	#IF Hotkey_Arr("Hook") && !Hotkey_Main("GetMod")
+	#IF Hotkey_Arr("Hook") && (Hotkey_GetKeyState("RButton") || Hotkey_Main("GetMod"))
+	#IF Hotkey_Arr("Hook") && Hotkey_GetKeyState("RButton")
 	#IF
 	IfInString, Options, M
 	{
@@ -139,6 +140,14 @@ Hotkey_Option(Options) {
 		Hotkey, IF, Hotkey_Arr("Hook")
 		Loop, Parse, MouseKey, |
 			Hotkey, %A_LoopField%, Hotkey_PressName
+	}
+	IfInString, Options, L
+	{
+		IfInString, Options, S
+			Hotkey, IF, Hotkey_Arr("Hook") && Hotkey_GetKeyState("RButton")
+		Else
+			Hotkey, IF, Hotkey_Arr("Hook") && (Hotkey_GetKeyState("RButton") || Hotkey_Main("GetMod"))
+		Hotkey, LButton, Hotkey_PressName
 	}
 	IfInString, Options, R
 	{
@@ -157,22 +166,12 @@ Hotkey_Option(Options) {
 	}
 	IfInString, Options, S
 		Hotkey_Arr("SingleKey", 1)
-	Else
-	{
-		IfInString, Options, L
-		{
-			Hotkey, IF, Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
-			Hotkey, LButton, Hotkey_PressName
-		}
-		IfInString, Options, H
-			Hotkey_Arr("LRMods", 1)
-	}
+	IfInString, Options, H
+		Hotkey_Arr("LRMods", 1)
 	Hotkey, IF
 }
 
 Hotkey_RButton() {
-	If Hotkey_Arr("SetRButton")
-		Return
 	#IF Hotkey_IsRegControl()
 	#IF
 	Hotkey, IF, Hotkey_IsRegControl()
@@ -181,8 +180,11 @@ Hotkey_RButton() {
 	Return
 
 	Hotkey_RButton:
-		Click
 		Return
+}
+
+Hotkey_GetKeyState(Button) {
+	Return GetKeyState(Button, "P")
 }
 
 Hotkey_IsRegControl() {
