@@ -114,7 +114,8 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 				VK := Format("vk{:X}", NumGet(Lp + 0, "UInt"))
 				Ext := NumGet(Lp + 0, 8, "UInt")
 				SC := Format("sc{:X}", (Ext & 1) << 8 | NumGet(Lp + 0, 4, "UInt"))
-				IsMod := Mods[VK]
+				If !Hotkey_Arr("SingleKey")
+					IsMod := Mods[VK]
 				If (Wp = 0x100 || Wp = 0x104)		;  WM_KEYDOWN := 0x100, WM_SYSKEYDOWN := 0x104
 					IsMod ? Hotkey_Main("Mod", IsMod) : Hotkey_Main(VK, SC)
 				Else IF ((Wp = 0x101 || Wp = 0x105) && VK != "vk5D")   ;  WM_KEYUP := 0x101, WM_SYSKEYUP := 0x105, AppsKey = "vk5D"
@@ -159,7 +160,9 @@ Hotkey_Option(Options) {
 			Hotkey % Ceil(A_Index/32) "Joy" Mod(A_Index-1,32)+1, Hotkey_PressName
 		SetFormat, IntegerFast, %S_FormatInteger%
 	}
-	IfInString, Options, H
+	IfInString, Options, S
+		Hotkey_Arr("SingleKey", 1)
+	Else IfInString, Options, H
 		Hotkey_Arr("LRMods", 1)
 	Hotkey, IF
 }
