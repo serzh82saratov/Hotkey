@@ -140,11 +140,6 @@ Hotkey_Option(Options) {
 		Loop, Parse, MouseKey, |
 			Hotkey, %A_LoopField%, Hotkey_PressName
 	}
-	IfInString, Options, L
-	{
-		Hotkey, IF, Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
-		Hotkey, LButton, Hotkey_PressName
-	}
 	IfInString, Options, R
 	{
 		Hotkey, IF, Hotkey_Arr("Hook")
@@ -162,8 +157,16 @@ Hotkey_Option(Options) {
 	}
 	IfInString, Options, S
 		Hotkey_Arr("SingleKey", 1)
-	Else IfInString, Options, H
-		Hotkey_Arr("LRMods", 1)
+	Else
+	{
+		IfInString, Options, L
+		{
+			Hotkey, IF, Hotkey_Arr("Hook") && Hotkey_Main("GetMod")
+			Hotkey, LButton, Hotkey_PressName
+		}
+		IfInString, Options, H
+			Hotkey_Arr("LRMods", 1)
+	}
 	Hotkey, IF
 }
 
