@@ -1,20 +1,21 @@
 
 	;  http://forum.script-coding.com/viewtopic.php?pid=72549#p72549
 
-Hotkey_Register(Controls) {
+Hotkey_Register(Controls*) {
 	Static IsStart
-	Local Name, Handle
-	For Name, Handle in Controls
+	Local k, v
+	For k, v in Controls
 	{
-		Hotkey_Controls("Name", Handle, Name)
-		Hotkey_Controls("HwndFromName", Name, Handle)
-		GuiControl, +ReadOnly, % Handle
+		Hotkey_Controls("Name", v[2], v[1])
+		Hotkey_Controls("HwndFromName", v[1], v[2])
+		Hotkey_Controls("Options", v[2], v[3] = "" ? "K" : v[3])
+		GuiControl, +ReadOnly, % v[2]
 	}
 	If IsStart
 		Return
 	#HotkeyInterval 0
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_WinEvent", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
-	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), Hotkey_RButton()
+	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), Hotkey_Option(), Hotkey_RButton()
 	Return IsStart := 1
 }
 
@@ -43,8 +44,7 @@ Hotkey_Main(Param1, Param2=0) {
 				OnlyMods := 0, K := {}
 			}
 			ControlHandle := Param2
-			If !Hotkey_Arr("Hook")
-				Hotkey_Arr("Hook", 1)
+			Hotkey_Arr("Hook", Hotkey_Controls("Options", ControlHandle))
 			PostMessage, 0x00B1, -1, -1, , ahk_id %ControlHandle%   ;  EM_SETSEL
 		}
 		Else If Hotkey_Arr("Hook")
@@ -58,14 +58,14 @@ Hotkey_Main(Param1, Param2=0) {
 	}
 	If Param1 = Mod
 	{
-		IsMod := Hotkey_Arr("LRMods") ? Param2 : SubStr(Param2, 2)
+		IsMod := Hotkey_Hook("D") ? Param2 : SubStr(Param2, 2)
 		If (K["M" IsMod] != "")
 			Return 1
 		K["M" IsMod] := IsMod "+", K["P" IsMod] := Prefix[IsMod]
 	}
 	Else If Param1 = ModUp
 	{
-		IsMod := Hotkey_Arr("LRMods") ? Param2 : SubStr(Param2, 2)
+		IsMod := Hotkey_Hook("D") ? Param2 : SubStr(Param2, 2)
 		K["M" IsMod] := "", K["P" IsMod] := ""
 		If (Hotkey != "")
 			Return 1
@@ -102,7 +102,7 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 	Local pHeap, Wp, Lp, Ext, VK, SC, IsMod
 	Critical
 
-	If !Hotkey_Arr("Hook")
+	If !Hotkey_Hook("K")
 		Return DllCall("CallNextHookEx", "Ptr", 0, "Int", nCode, "UInt", wParam, "UInt", lParam)
 	pHeap := DllCall("HeapAlloc", "Ptr", hHeap, "UInt", HEAP_ZERO_MEMORY, "Ptr", Size, "Ptr")
 	DllCall("RtlMoveMemory", "Ptr", pHeap, "Ptr", lParam, "Ptr", Size), oMem.Push([wParam, pHeap])
@@ -112,13 +112,13 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 	Hotkey_LLKPWork:
 		While (oMem[1] != "")
 		{
-			IF Hotkey_Arr("Hook")
+			IF Hotkey_Hook("K")
 			{
 				Wp := oMem[1][1], Lp := oMem[1][2]
 				VK := Format("vk{:X}", NumGet(Lp + 0, "UInt"))
 				Ext := NumGet(Lp + 0, 8, "UInt")
 				SC := Format("sc{:X}", (Ext & 1) << 8 | NumGet(Lp + 0, 4, "UInt"))
-				If !Hotkey_Arr("SingleKey")
+				If !Hotkey_Hook("S")
 					IsMod := Mods[VK]
 				If (Wp = 0x100 || Wp = 0x104)		;  WM_KEYDOWN := 0x100, WM_SYSKEYDOWN := 0x104
 					IsMod ? Hotkey_Main("Mod", IsMod) : Hotkey_Main(VK, SC)
@@ -131,49 +131,31 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 		Return
 }
 
-Hotkey_Option(Options) {
+Hotkey_Option() {
 	Local S_FormatInteger, MouseKey
-	#IF Hotkey_Arr("Hook")
-	#IF Hotkey_Arr("Hook") && !Hotkey_Main("GetMod")
-	#IF Hotkey_Arr("Hook") && (Hotkey_GetKeyState("RButton") || Hotkey_Main("GetMod"))
-	#IF Hotkey_Arr("Hook") && Hotkey_GetKeyState("RButton")
+	#IF Hotkey_Hook("M")
+	#IF Hotkey_Hook("L") && (Hotkey_GetKeyState("RButton") || Hotkey_Main("GetMod"))
+	#IF Hotkey_Hook("R")
+	#IF Hotkey_Hook("J") && !Hotkey_Main("GetMod")
 	#IF
-	IfInString, Options, M
-	{
-		MouseKey := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
-		Hotkey, IF, Hotkey_Arr("Hook")
-		Loop, Parse, MouseKey, |
-			Hotkey, %A_LoopField%, Hotkey_PressName
-	}
-	IfInString, Options, L
-	{
-		IfInString, Options, S
-			Hotkey, IF, Hotkey_Arr("Hook") && Hotkey_GetKeyState("RButton")
-		Else
-			Hotkey, IF, Hotkey_Arr("Hook") && (Hotkey_GetKeyState("RButton") || Hotkey_Main("GetMod"))
-		Hotkey, LButton, Hotkey_PressName
-	}
-	IfInString, Options, R
-	{
-		Hotkey, IF, Hotkey_Arr("Hook")
-		Hotkey, RButton, Hotkey_PressName
-		Hotkey_Arr("SetRButton", 1)
-	}
-	IfInString, Options, J
-	{
-		S_FormatInteger := A_FormatInteger
-		SetFormat, IntegerFast, D
-		Hotkey, IF, Hotkey_Arr("Hook") && !Hotkey_Main("GetMod")
-		Loop, 128
-			Hotkey % Ceil(A_Index/32) "Joy" Mod(A_Index-1,32)+1, Hotkey_PressName
-		SetFormat, IntegerFast, %S_FormatInteger%
-	}
-	IfInString, Options, S
-		Hotkey_Arr("SingleKey", 1)
-	IfInString, Options, H
-		Hotkey_Arr("LRMods", 1)
-	IfInString, Options, E
-		Hotkey_Arr("OnlyEngSym", 1)
+
+	MouseKey := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
+	Hotkey, IF, Hotkey_Hook("M")
+	Loop, Parse, MouseKey, |
+		Hotkey, %A_LoopField%, Hotkey_PressName
+
+	Hotkey, IF, Hotkey_Hook("L") && (Hotkey_GetKeyState("RButton") || Hotkey_Main("GetMod"))
+	Hotkey, LButton, Hotkey_PressName
+
+	Hotkey, IF, Hotkey_Hook("R")
+	Hotkey, RButton, Hotkey_PressName
+
+	S_FormatInteger := A_FormatInteger
+	SetFormat, IntegerFast, D
+	Hotkey, IF, Hotkey_Hook("J") && !Hotkey_Main("GetMod")
+	Loop, 128
+		Hotkey % Ceil(A_Index/32) "Joy" Mod(A_Index-1,32)+1, Hotkey_PressName
+	SetFormat, IntegerFast, %S_FormatInteger%
 	Hotkey, IF
 }
 
@@ -204,7 +186,7 @@ Hotkey_IsRegFocus() {
 	WinExist("A")
 	ControlGetFocus, ControlNN
 	ControlGet, hFocus, Hwnd, , %ControlNN%
-	Hotkey_Name(hFocus) != "" ? Hotkey_Arr("Hook", 1) : 0
+	Hotkey_Name(hFocus) != "" ? Hotkey_Arr("Hook", Hotkey_Controls("Options", hFocus)) : 0
 }
 
 Hotkey_WinEvent(hWinEventHook, event, hwnd) {
@@ -236,7 +218,7 @@ Hotkey_Arr(P*) {
 }
 
 Hotkey_Controls(Type, P*) {
-	Static ArrName := [], ArrValue := [], ArrValueFromName := {}, ArrHwndFromName := []
+	Static ArrName := [], ArrValue := [], ArrValueFromName := {}, ArrHwndFromName := [], ArrOptions := []
 	Return P.MaxIndex() = 1 ? Arr%Type%[P[1]] : (Arr%Type%[P[1]] := P[2])
 }
 
@@ -271,6 +253,10 @@ Hotkey_Set(Name, Value="") {
 
 Hotkey_IniWrite(Hwnd, Section = "", FilePath = "") {
 	IniWrite, % Hotkey_Value(Hwnd), % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Hotkey_Name(Hwnd)
+}
+
+Hotkey_Hook(Option) {
+	Return !!InStr(Hotkey_Arr("Hook"), Option)
 }
 
 	; -------------------------------------- Read and format --------------------------------------
