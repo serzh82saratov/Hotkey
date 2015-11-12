@@ -1,4 +1,3 @@
-
 	;  http://forum.script-coding.com/viewtopic.php?pid=72549#p72549
 
 Hotkey_Register(Controls*) {
@@ -11,12 +10,11 @@ Hotkey_Register(Controls*) {
 		Hotkey_Controls("Options", v[2], v[3] = "" ? "K" : v[3])
 		GuiControl, +ReadOnly, % v[2]
 	}
-	Hotkey_InitHotkeys(), Hotkey_IsRegFocus()
 	If IsStart
 		Return
 	#HotkeyInterval 0
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_WinEvent", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
-	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), IsStart := 1
+	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), Hotkey_InitHotkeys(), Hotkey_IsRegFocus(), IsStart := 1
 }
 
 Hotkey_Main(Param1, Param2=0) {
@@ -133,11 +131,11 @@ Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 
 Hotkey_InitHotkeys() {
 	Local S_FormatInteger, MouseKey
+	#IF Hotkey_IsRegControl()
 	#IF Hotkey_Hook("M")
 	#IF Hotkey_Hook("L") && (Hotkey_GetKeyState("RButton") || Hotkey_Main("GetMod"))
 	#IF Hotkey_Hook("R")
 	#IF Hotkey_Hook("J") && !Hotkey_Main("GetMod")
-	#IF Hotkey_IsRegControl()
 	#IF
 
 	MouseKey := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
@@ -157,7 +155,7 @@ Hotkey_InitHotkeys() {
 	Loop, 128
 		Hotkey % Ceil(A_Index/32) "Joy" Mod(A_Index-1,32)+1, Hotkey_PressName
 	SetFormat, IntegerFast, %S_FormatInteger%
-	
+
 	Hotkey, IF, Hotkey_IsRegControl()
 	Hotkey, RButton Up, Hotkey_RButton
 	Hotkey, IF
