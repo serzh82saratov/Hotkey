@@ -15,7 +15,7 @@ Hotkey_Register(Controls*) {
 		Return
 	#HotkeyInterval 0
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_WinEvent", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
-	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), Hotkey_Option(), Hotkey_RButton()
+	Hotkey_Arr("hHook", Hotkey_SetWindowsHookEx()), Hotkey_Option(), Hotkey_RButton(), Hotkey_IsRegFocus()
 	Return IsStart := 1
 }
 
@@ -186,7 +186,7 @@ Hotkey_IsRegFocus() {
 	WinExist("A")
 	ControlGetFocus, ControlNN
 	ControlGet, hFocus, Hwnd, , %ControlNN%
-	Hotkey_Name(hFocus) != "" ? Hotkey_Arr("Hook", Hotkey_Controls("Options", hFocus)) : 0
+	Hotkey_Name(hFocus) != "" ? Hotkey_Main("Control", hFocus) : 0
 }
 
 Hotkey_WinEvent(hWinEventHook, event, hwnd) {
