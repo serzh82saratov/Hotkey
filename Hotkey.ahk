@@ -8,6 +8,7 @@ Hotkey_Register(Controls*) {
 		Hotkey_Controls("Name", v[2], v[1])
 		Hotkey_Controls("HwndFromName", v[1], v[2])
 		Hotkey_Controls("Options", v[2], v[3] = "" ? "K" : v[3])
+		Hotkey_Controls("Value", v[2], Hotkey_Controls("ValueFromName", v[1]))
 		GuiControl, +ReadOnly, % v[2]
 	}
 	If IsStart
