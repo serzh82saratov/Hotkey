@@ -138,16 +138,16 @@ Hotkey_InitHotkeys() {
 	Static MouseKey := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
 	#IF Hotkey_IsRegControl()
 	#IF Hotkey_Hook("M")
-	#IF Hotkey_Hook("L") && Hotkey_GetKeyState("RButton")
+	#IF Hotkey_Hook("L") && GetKeyState("RButton", "P")
 	#IF Hotkey_Hook("R")
 	#IF Hotkey_Hook("J") && !Hotkey_Main("GetMod")
 	#IF
-	
+
 	Hotkey, IF, Hotkey_Hook("M")
 	Loop, Parse, MouseKey, |
 		Hotkey, %A_LoopField%, Hotkey_PressName
 
-	Hotkey, IF, Hotkey_Hook("L") && Hotkey_GetKeyState("RButton")
+	Hotkey, IF, Hotkey_Hook("L") && GetKeyState("RButton"`, "P")
 	Hotkey, LButton, Hotkey_PressName
 
 	Hotkey, IF, Hotkey_Hook("R")
@@ -165,15 +165,11 @@ Hotkey_InitHotkeys() {
 	Hotkey, RButton, Hotkey_RButton
 	Hotkey, IF
 	Return
-	
+
 	Hotkey_RButton:
 		Click
 	Hotkey_RButton_Up:
 		Return
-}
-
-Hotkey_GetKeyState(Button) {
-	Return GetKeyState(Button, "P")
 }
 
 Hotkey_IsRegControl() {
@@ -255,7 +251,7 @@ Hotkey_Delete(ID, Destroy=0) {
 	If Destroy
 		DllCall("DestroyWindow", "Ptr", Hwnd)
 	Else
-		PostMessage, 0x00CF, 0, , , % "ahk_id" Hwnd		;  EM_SETREADONLY 
+		PostMessage, 0x00CF, 0, , , % "ahk_id" Hwnd		;  EM_SETREADONLY
 	Return Hwnd
 }
 
@@ -317,8 +313,8 @@ Hotkey_HKToStr(HK) {
 }
 
 Hotkey_HKToSend(HK, Section = "", FilePath = "") {
-	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
-					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
+	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"]
+	,[">!","RAlt"],["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
 	, Prefix := [["^","LCtrl"],["!","LAlt"],["+","LShift"],["#","LWin"]]
 	Local K, K1, K2, I, V, M1, M2, R
 	If (HK = "")
