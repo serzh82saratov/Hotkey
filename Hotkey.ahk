@@ -291,7 +291,7 @@ Hotkey_IniWrite(ID, Section = "", FilePath = "") {
 
 Hotkey_HKToStr(HK) {
 	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
-					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
+	,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
 	, Prefix := [["^","Ctrl"],["!","Alt"],["+","Shift"],["#","Win"]]
 	, EngSym := {"vkBB":"=","vkBC":",","vkBD":"-","vkBE":".","vkBF":"/","vkC0":"``","vkBA":"`;"
 				,"vkDB":"[","vkDC":"\","vkDD":"]","vkDE":"'","vk41":"A","vk42":"B","vk43":"C"
@@ -303,13 +303,12 @@ Hotkey_HKToStr(HK) {
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
 	If (K2 = "")
 		Return "" Hotkey_Arr("Empty")
-	If K2 ~= "^vk"
-		K2 := K2 = "vkBF" ? "/" : (Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : Format("{:U}", GetKeyName(K2)))
+	If InStr("|" K2, "|vk")
+		K2 := K2 = "vkBF" ? "/" : (Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : GetKeyName(K2))
 	If (K1 != "")
 		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
-			K1 := StrReplace(K1, V[1], "", R)
-			, R ? (M .= V[2] "+") : 0
-	Return M . K2
+			K1 := StrReplace(K1, V[1], "", R), R && (M .= V[2] "+")
+	Return M . (StrLen(K2) = 1 ? Format("{:U}", K2) : K2)
 }
 
 Hotkey_HKToSend(HK, Section = "", FilePath = "") {
