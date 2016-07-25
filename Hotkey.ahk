@@ -257,7 +257,7 @@ Hotkey_Delete(ID, Destroy=0) {
 Hotkey_Set(Name, Value="") {
 	Text := Value = "" ? Hotkey_Arr("Empty") : Hotkey_HKToStr(Value)
 	SendMessage, 0xC, 0, &Text, , % "ahk_id" Hotkey_ID(Name)
-	Return Hotkey_HKToStr(Value), Hotkey_Value(Name, Value)
+	Return Hotkey_HKToStr(Value), Hotkey_Value(Name, Value), Hotkey_Value(Hotkey_ID(Name), Value)
 }
 
 Hotkey_Read(Name, Section = "", FilePath = "") {
