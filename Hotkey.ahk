@@ -100,8 +100,8 @@ Hotkey_PressName:
 
 Hotkey_LowLevelKeyboardProc(nCode, wParam, lParam) {
 	Static Mods := {"vkA4":"LAlt","vkA5":"RAlt","vkA2":"LCtrl","vkA3":"RCtrl"
-		,"vkA0":"LShift","vkA1":"RShift","vk5B":"LWin","vk5C":"RWin"}
-		, oMem := [], HEAP_ZERO_MEMORY := 0x8, Size := 16, hHeap := DllCall("GetProcessHeap", "Ptr")
+		,"vkA0":"LShift","vkA1":"RShift","vk5B":"LWin","vk5C":"RWin"}, oMem := []
+		, HEAP_ZERO_MEMORY := 0x8, Size := 16, hHeap := DllCall("GetProcessHeap", "Ptr")
 	Local pHeap, Wp, Lp, Ext, VK, SC, IsMod
 
 	If !Hotkey_Hook("K")
@@ -157,7 +157,7 @@ Hotkey_InitHotkeys() {
 	SetFormat, IntegerFast, D
 	Hotkey, IF, Hotkey_Hook("J") && !Hotkey_Main("GetMod")
 	Loop, 128
-		Hotkey % Ceil(A_Index/32) "Joy" Mod(A_Index-1,32)+1, Hotkey_PressName
+		Hotkey % Ceil(A_Index / 32) "Joy" Mod(A_Index - 1, 32) + 1, Hotkey_PressName
 	SetFormat, IntegerFast, %S_FormatInteger%
 
 	Hotkey, IF, Hotkey_IsRegControl()
@@ -195,12 +195,11 @@ Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, i
 }
 
 Hotkey_SetWindowsHookEx() {
-	OnExit("Hotkey_Exit")
 	Return DllCall("SetWindowsHookEx" . (A_IsUnicode ? "W" : "A")
 		, "Int", 13   ;  WH_KEYBOARD_LL := 13
 		, "Ptr", RegisterCallback("Hotkey_LowLevelKeyboardProc", "Fast")
 		, "Ptr", DllCall("GetModuleHandle", "UInt", 0, "Ptr")
-		, "UInt", 0, "Ptr")
+		, "UInt", 0, "Ptr"), OnExit("Hotkey_Exit")
 }
 
 Hotkey_Exit() {
@@ -256,8 +255,9 @@ Hotkey_Delete(ID, Destroy=0) {
 }
 
 Hotkey_Set(Name, Value="") {
-	Hotkey_Value(Name, Value)
-	Return Hotkey_HKToStr(Value)
+	Text := Value = "" ? Hotkey_Arr("Empty") : Hotkey_HKToStr(Value)
+	SendMessage, 0xC, 0, &Text, , % "ahk_id" Hotkey_ID(Name)
+	Return Hotkey_HKToStr(Value), Hotkey_Value(Name, Value)
 }
 
 Hotkey_Read(Name, Section = "", FilePath = "") {
@@ -289,6 +289,8 @@ Hotkey_IniWrite(ID, Section = "", FilePath = "") {
 
 	; -------------------------------------- Format --------------------------------------
 
+	; http://forum.script-coding.com/viewtopic.php?pid=105023#p105023
+	
 Hotkey_HKToStr(HK) {
 	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
 	,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
@@ -312,8 +314,8 @@ Hotkey_HKToStr(HK) {
 }
 
 Hotkey_HKToSend(HK, Section = "", FilePath = "") {
-	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"]
-	,[">!","RAlt"],["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
+	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
+	,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
 	, Prefix := [["^","LCtrl"],["!","LAlt"],["+","LShift"],["#","LWin"]]
 	Local K, K1, K2, I, V, M1, M2, R
 	If (HK = "")
