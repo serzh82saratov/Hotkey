@@ -1,0 +1,17 @@
+;	только модификаторы          http://forum.script-coding.com/viewtopic.php?pid=108950#p108950
+
+
+#NoEnv
+#SingleInstance Force
+Hotkey_IniPath(A_ScriptDir "\Hotkey.ini")
+Gui, Add, Edit, Center w60 r1 hwndhMyHotkey1 gOnlyMods, % Hotkey_Read("MyHotkey1", "Section") 
+Gui, Add, Edit, Center w60 r1 hwndhMyHotkey2 gOnlyMods, % Hotkey_Read("MyHotkey2", "Section") 
+Hotkey_Register(["MyHotkey1",hMyHotkey1,"SKG1"],["MyHotkey2",hMyHotkey2,"SKG1"])
+Gui, Show 
+Return
+
+OnlyMods(CtrlHwnd) { 
+	; If !(Hotkey_Value(CtrlHwnd) ~= "^(L|R)(Alt|Ctrl|Shift|Win)$")
+		; Hotkey_Set(Hotkey_ID(CtrlHwnd))
+	Hotkey_IniWrite(CtrlHwnd, "Section")
+}
