@@ -277,8 +277,11 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 			If ((Value := Hotkey_Value(Name)) != "")
 				For m, n in GN[NG[Name]] {
 					If (n != Name && Hotkey_Equal(Value, Hotkey_Value(n))) {
+						Hotkey_Set(Name)
+						If !DllCall("IsWindowVisible", "Ptr", Hotkey_ID(n))
+							Return
 						DllCall("ShowWindowAsync", "Ptr", Hotkey_ID(n), "Int", 0)
-						Blink[Hotkey_ID(n)] := 1, i := 5, Hotkey_Set(Name)
+						Blink[Hotkey_ID(n)] := 1, i := 5
 						SetTimer, Hotkey_BlinkControl, -50
 					}
 				}
