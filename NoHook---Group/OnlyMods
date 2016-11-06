@@ -11,7 +11,11 @@ Gui, Show
 Return
 
 OnlyMods(CtrlHwnd) { 
-	; If !(Hotkey_Value(CtrlHwnd) ~= "^(L|R)(Alt|Ctrl|Shift|Win)$")
-		; Hotkey_Set(Hotkey_ID(CtrlHwnd))
+	If !(Hotkey_Value(CtrlHwnd) ~= "^(L|R)(Alt|Ctrl|Shift|Win)$")
+		Hotkey_Set(Hotkey_ID(CtrlHwnd))
 	Hotkey_IniWrite(CtrlHwnd, "Section")
+}
+
+GuiClose() {
+    ExitApp
 }
