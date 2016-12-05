@@ -281,7 +281,7 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 						If !DllCall("IsWindowVisible", "Ptr", Hotkey_ID(n))
 							Return
 						DllCall("ShowWindowAsync", "Ptr", Hotkey_ID(n), "Int", 0)
-						Blink[Hotkey_ID(n)] := 1, i := 5
+						Blink[Hotkey_ID(n)] := 1, i := 3
 						SetTimer, Hotkey_BlinkControl, -50
 					}
 				}
