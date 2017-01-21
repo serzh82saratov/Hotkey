@@ -279,7 +279,7 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 				For m, n in GN[NG[Name]] {
 					If (n != Name && Hotkey_Equal(Value, Hotkey_Value(n))) {
 						Hotkey_Set(Name)
-						(f != "") && (r.names.Push(n), r.this := Name, r.value := Value)
+						(f != "") && (r.names.Push(n), r.this := Name, r.value := Value, r.group := NG[Name])
 						If !DllCall("IsWindowVisible", "Ptr", Hotkey_ID(n))
 							Continue
 						DllCall("ShowWindowAsync", "Ptr", Hotkey_ID(n), "Int", 0)
