@@ -270,23 +270,27 @@ Hotkey_IniWrite(ID, Section = "", FilePath = "") {
 	; -------------------------------------- Group --------------------------------------
 
 Hotkey_Group(Key = "", p1 = "", p2 = "") {
-	Local Name, Value, k, v, n, m
+	Local Name, Value, k, v, n, m, f, r
 	Static NG := {}, GN := [], Blink := [], SaveCheck := [], i := 0
 	If (Key = "") {
 		For k, Name in SaveCheck {
-			If ((Value := Hotkey_Value(Name)) != "")
+			If ((Value := Hotkey_Value(Name)) != "") {
+				(f := Hotkey_Arr("GroupEvents")) != "" && (r := {}, r.names := [])
 				For m, n in GN[NG[Name]] {
 					If (n != Name && Hotkey_Equal(Value, Hotkey_Value(n))) {
 						Hotkey_Set(Name)
+						(f != "") && (r.names.Push(n), r.this := Name, r.value := Value)
 						If !DllCall("IsWindowVisible", "Ptr", Hotkey_ID(n))
-							Return
+							Continue
 						DllCall("ShowWindowAsync", "Ptr", Hotkey_ID(n), "Int", 0)
 						Blink[Hotkey_ID(n)] := 1, i := 3
 						SetTimer, Hotkey_BlinkControl, -50
 					}
 				}
+			}
 			SaveCheck.Delete(k)
 		}
+		(f != "") && (r.this != "") && %f%(r)
 	}
 	Else If (Key = "Set")
 		NG[p1] := p2, IsObject(GN[p2]) ? GN[p2].Push(p1) : GN[p2] := [p1]
