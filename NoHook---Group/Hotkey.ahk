@@ -1,4 +1,5 @@
-
+	;  Автор - serzh82saratov
+	;  E-Mail: serzh82saratov@mail.ru
 	;  http://forum.script-coding.com/viewtopic.php?id=8343
 
 Hotkey_Register(Controls*) {
@@ -401,3 +402,83 @@ Hotkey_HKToSend(HK, Section = "", FilePath = "") {
 			, R ? (M1 .= "{" V[2] " Down}", M2 .= "{" V[2] " Up}") : 0
 	Return M1 . "{" K2 "}" . M2
 }
+
+
+	; ---------------------------------------------------------------------------------
+
+
+
+;	только модификаторы          http://forum.script-coding.com/viewtopic.php?pid=108950#p108950
+
+
+
+
+
+#NoEnv
+#SingleInstance Force
+
+Hotkey_Arr("Empty", "NO")
+Hotkey_Arr("GroupEvents", "GroupEventsProc")
+; Hotkey_Arr("OnlyEngSym", True)
+Hotkey_IniPath(A_ScriptDir "\Hotkey.ini")
+Hotkey_IniSection("Hotkeys")
+
+Loop 4
+    GuiCreate(A_Index)
+Hotkey_Group("CheckAll")
+Hotkey_ChangeOption("1Hotkey1", "KMLRJDG1") 
+Return
+
+GroupEventsProc(arr) {
+ 	for k, v in arr.names
+		names .= "`n" v
+	WinGetPos, x, y, w, h, % "ahk_id" Hotkey_ID(arr.this)
+	S_CoordModeToolTip := A_CoordModeToolTip
+	CoordMode, ToolTip, Screen
+	ToolTip, % "'" Hotkey_HKToStr(arr.value) "' уже назначено в группе номер: " arr.group names, x + w + 2, y + h + 2, 20
+	CoordMode, ToolTip, %S_CoordModeToolTip%
+	SetTimer HideTooltip20, -500
+	Return
+
+	HideTooltip20:
+		ToolTip,,,, 20
+		Return
+}
+
+GuiCreate(I) {
+    Gui, %I%:-DPIScale +AlwaysOnTop +LabelGui
+    Gui, %I%:Add, Edit, Center xm ym w300 r1 hwndh1 gSave, % Hotkey_Read(I "Hotkey1")
+    Gui, %I%:Add, Edit, Center wp y+10 r1 hwndh2 gSave, % Hotkey_Read(I "Hotkey2")
+	Hotkey_Register([I "Hotkey1",h1,"KMLRJG1"], [I "Hotkey2",h2,"KMLRJDG1"])
+    Gui, %I%:Show, % "y100 x" 100+(I-1)*350, Hotkey Gui %I%
+}
+
+Save(Hwnd) {
+    Hotkey_IniWrite(Hwnd)
+}
+
+GuiClose() {
+    ExitApp
+}
+
+
+
+
+/*
+sc печатные			47
+sc := "2|3|4|5|6|7|8|9|A|B|C|D|10|11|12|13|14|15|16|17|18|19|1A|1B|1E|1F|"
+	. "20|21|22|23|24|25|26|27|28|29|2B|2C|2D|2E|2F|30|31|32|33|34|35"
+
+
+sc без печатных и Control,Alt,Shift,RControl,LControl,LShift,RShift,LAlt,RAlt (9)			61
+scn := "1|E|F|1C|37|39|3A|3B|3C|3D|3E|3F|40|41|42|43|44|45|46|47|48|49|4A|4B|4C|4D|4E|4F|50|51|52|53|54|"
+	. "57|58|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|76|11C|135|147|148|149|14B|14D|14F|150|151|152|153|15D"
+
+
+vk без мыши (9) и LWin,RWin (2)			32
+vk := "3|13|5F|60|61|62|63|64|65|66|67|68|69|6E|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
+
+
+Mods := "LAlt|RAlt|LCtrl|RCtrl|LShift|RShift|LWin|RWin"
+MouseKey := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
+*/
