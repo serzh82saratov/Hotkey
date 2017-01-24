@@ -1,6 +1,6 @@
 	;  Автор - serzh82saratov
 	;  E-Mail: serzh82saratov@mail.ru
-	;  http://forum.script-coding.com/viewtopic.php?id=8343
+	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 
 Hotkey_Register(Controls*) {
 	Static IsStart
