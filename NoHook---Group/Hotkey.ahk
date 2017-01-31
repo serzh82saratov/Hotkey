@@ -374,7 +374,7 @@ Hotkey_HKToStr(HK) {
 				,"vkDC":"\","vk5A":"Z","vk58":"X","vk43":"C","vk56":"V","vk42":"B"
 				,"vk4E":"N","vk4D":"M","vkBC":",","vkBE":".","vkBF":"/"}
 
-	Local K, K1, K2, I, V, M, R
+	Local K, K1, K2, I, V, M
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
 	If (K2 = "")
 		Return "" Hotkey_Arr("Empty")
@@ -382,7 +382,7 @@ Hotkey_HKToStr(HK) {
 		K2 := Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : Format("{:U}", GetKeyName(K2))
 	If (K1 != "")
 		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
-			K1 := StrReplace(K1, V[1], "", R), R && (M .= V[2] "+")
+			InStr(K1, V[1]) && (M .= V[2] "+")
 	Return M . (StrLen(K2) = 1 ? Format("{:U}", K2) : K2)
 }
 
