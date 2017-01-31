@@ -378,7 +378,7 @@ Hotkey_HKToStr(HK) {
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
 	If (K2 = "")
 		Return "" Hotkey_Arr("Empty")
-	If (InStr("|" K2, "|sc", 1) || InStr("|" K2, "|vk", 1))
+	If (InStr("|" K2, "|sc") || InStr("|" K2, "|vk"))
 		K2 := Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : Format("{:U}", GetKeyName(K2))
 	If (K1 != "")
 		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
