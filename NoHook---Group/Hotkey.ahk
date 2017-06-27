@@ -82,13 +82,23 @@ Hotkey_ViewMod:
 	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
 	Return
 
-Hotkey_View:
-Hotkey_ViewSC:
-	If (A_ThisLabel = "Hotkey_ViewSC")
-		KeyName := Hotkey_Arr("OnlyEngSym") ? EngSym[A_ThisHotkey] : Format("{:U}", GetKeyName(A_ThisHotkey))
+Hotkey_ViewNum:
+	 If InStr(Hotkey_Arr("Hook"), "N")
+		KeyName := Hotkey := GetKeyName(A_ThisHotkey)
 	Else
-		KeyName := A_ThisHotkey
-	Hotkey := A_ThisHotkey, OnlyMods := 0
+		KeyName := GetKeyName(A_ThisHotkey), Hotkey := Format("sc{:x}", GetKeySC(A_ThisHotkey))
+	GoTo, Hotkey_Put
+
+Hotkey_ViewSC:
+	KeyName := Hotkey_Arr("OnlyEngSym") ? EngSym[A_ThisHotkey] : Format("{:U}", GetKeyName(A_ThisHotkey))
+	Hotkey := A_ThisHotkey
+	GoTo, Hotkey_Put
+
+Hotkey_View:
+	KeyName := Hotkey := A_ThisHotkey
+
+Hotkey_Put:
+	OnlyMods := 0
 	K.Prefix := K.PLCtrl K.PRCtrl K.PLAlt K.PRAlt K.PLShift K.PRShift K.PLWin K.PRWin K.PCtrl K.PAlt K.PShift K.PWin
 	Hotkey_Value(Hotkey_ID(ControlHandle), K.Prefix Hotkey), Hotkey_Value(ControlHandle, K.Prefix Hotkey)
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
@@ -105,9 +115,11 @@ Hotkey_InitHotkeys() {
 	, nmMouse := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
 	, scSymb := "2|3|4|5|6|7|8|9|A|B|C|D|10|11|12|13|14|15|16|17|18|19|1A|1B|"
 		. "1E|1F|20|21|22|23|24|25|26|27|28|29|2B|2C|2D|2E|2F|30|31|32|33|34|35"
-	, scNoSymb := "1|E|F|1C|37|39|3A|3B|3C|3D|3E|3F|40|41|42|43|44|45|46|47|48|49|4A|4B|4C|4D|4E|4F|50|51|52|"
-		. "53|54|57|58|63|64|65|66|67|68|69|6A|6B|6C|6D|6E|76|11C|135|147|148|149|14B|14D|14F|150|151|152|153|15D"
-	, vkOther := "3|13|5F|60|61|62|63|64|65|66|67|68|69|6E|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
+	; , scNumSymb := "53|52|4F|50|51|4B|4C|4D|47|48|49"
+	, scOther := "1|E|F|1C|37|39|3A|3B|3C|3D|3E|3F|40|41|42|43|44|45|46|4A|4E|54|57|58|63|64|65|"
+		. "66|67|68|69|6A|6B|6C|6D|6E|76|11C|135|147|148|149|14B|14D|14F|150|151|152|153|15D"
+	, vkNum := "2E|6E|60|2D|61|23|62|28|63|22|64|25|65|C|66|27|67|24|68|26|69"
+	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
 	S_BatchLines := A_BatchLines
 	SetBatchLines, -1
 	#IF Hotkey_IsRegControl()
@@ -129,8 +141,10 @@ Hotkey_InitHotkeys() {
 	}
 	Loop, Parse, scSymb, |
 		Hotkey, % "sc" A_LoopField, Hotkey_ViewSC
-	Loop, Parse, scNoSymb, |
+	Loop, Parse, scOther, |
 		Hotkey, % GetKeyName("sc" A_LoopField), Hotkey_View
+	Loop, Parse, vkNum, |
+		Hotkey, % "vk" A_LoopField, Hotkey_ViewNum
 	Loop, Parse, vkOther, |
 		Hotkey, % GetKeyName("vk" A_LoopField), Hotkey_View
 	Hotkey, IF, Hotkey_Hook("L") && GetKeyState("RButton"`, "P")
@@ -379,7 +393,7 @@ Hotkey_HKToStr(HK) {
 	If (K2 = "")
 		Return "" Hotkey_Arr("Empty")
 	If (InStr("|" K2, "|sc") || InStr("|" K2, "|vk"))
-		K2 := Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : Format("{:U}", GetKeyName(K2))
+		K2 := Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : GetKeyName(K2)
 	If (K1 != "")
 		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
 			K1 := StrReplace(K1, V[1], "", R), R && (M .= V[2] "+")
