@@ -40,10 +40,11 @@ Hotkey_Main(Param1, Param2 = "") {
 		Return K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	If Param2
 	{
+		K := {}
 		If OnlyMods
 		{
 			SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
-			OnlyMods := 0, K := {}
+			OnlyMods := 0
 		}
 		ControlHandle := Param2
 		Hotkey_Arr("Hook", Hotkey_Options(ControlHandle))
@@ -51,7 +52,7 @@ Hotkey_Main(Param1, Param2 = "") {
 	}
 	Else If Hotkey_Arr("Hook")
 	{
-		Hotkey_Arr("Hook", 0), K := {}
+		Hotkey_Arr("Hook", 0)
 		If OnlyMods
 			SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
 		SetTimer, Hotkey_IsRegFocus, -200
@@ -115,10 +116,9 @@ Hotkey_InitHotkeys() {
 	, nmMouse := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
 	, scSymb := "2|3|4|5|6|7|8|9|A|B|C|D|10|11|12|13|14|15|16|17|18|19|1A|1B|"
 		. "1E|1F|20|21|22|23|24|25|26|27|28|29|2B|2C|2D|2E|2F|30|31|32|33|34|35"
-	; , scNumSymb := "53|52|4F|50|51|4B|4C|4D|47|48|49"
 	, scOther := "1|E|F|1C|37|39|3A|3B|3C|3D|3E|3F|40|41|42|43|44|45|46|4A|4E|54|57|58|63|64|65|"
 		. "66|67|68|69|6A|6B|6C|6D|6E|76|11C|135|147|148|149|14B|14D|14F|150|151|152|153|15D"
-	, vkNum := "2E|6E|60|2D|61|23|62|28|63|22|64|25|65|C|66|27|67|24|68|26|69"
+	, vkNum := "2E|6E|60|2D|61|23|62|28|63|22|64|25|65|C|66|27|67|24|68|26|69"	; , scNumSymb := "53|52|4F|50|51|4B|4C|4D|47|48|49"
 	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
 	S_BatchLines := A_BatchLines
 	SetBatchLines, -1
@@ -367,9 +367,7 @@ Hotkey_ModsSub(Value) {
 	; http://forum.script-coding.com/viewtopic.php?pid=105023#p105023
 
 Hotkey_HKToStr(HK) {
-	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
-					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
-	, Prefix := [["^","Ctrl"],["!","Alt"],["+","Shift"],["#","Win"]]
+	Static Prefix := {"^":"Ctrl","!":"Alt","+":"Shift","#":"Win","<":"L",">":"R"}
 	, EngSym := {"sc2":"1","sc3":"2","sc4":"3","sc5":"4","sc6":"5","sc7":"6"
 				,"sc8":"7","sc9":"8","scA":"9","scB":"0","scC":"-","scD":"="
 				,"sc10":"Q","sc11":"W","sc12":"E","sc13":"R","sc14":"T","sc15":"Y"
@@ -388,31 +386,26 @@ Hotkey_HKToStr(HK) {
 				,"vkDC":"\","vk5A":"Z","vk58":"X","vk43":"C","vk56":"V","vk42":"B"
 				,"vk4E":"N","vk4D":"M","vkBC":",","vkBE":".","vkBF":"/"}
 
-	Local K, K1, K2, I, V, M, R
+	Local K, K1, K2, R, R1, R2, M, P := 1
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
 	If (K2 = "")
 		Return "" Hotkey_Arr("Empty")
-	If (InStr("|" K2, "|sc") || InStr("|" K2, "|vk"))
+	If K2 ~= "i)^(vk|sc[^r])"
 		K2 := Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : GetKeyName(K2)
-	If (K1 != "")
-		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
-			K1 := StrReplace(K1, V[1], "", R), R && (M .= V[2] "+")
+	While P := RegExMatch(K1, "S)([<>])*([\^\+!#])", R, P) + StrLen(R)
+		M .= Prefix[R1] . Prefix[R2] . "+"
 	Return M . (StrLen(K2) = 1 ? Format("{:U}", K2) : K2)
 }
 
 Hotkey_HKToSend(HK, Section = "", FilePath = "") {
-	Static LRPrefix := [["<^","LCtrl"],[">^","RCtrl"],["<!","LAlt"],[">!","RAlt"]
-					,["<+","LShift"],[">+","RShift"],["<#","LWin"],[">#","RWin"]]
-		, Prefix := [["^","LCtrl"],["!","LAlt"],["+","LShift"],["#","LWin"]]
-	Local K, K1, K2, I, V, M1, M2, R
+	Static V := {"^":"Ctrl","!":"Alt","+":"Shift","#":"Win","<":"L",">":"R","":"L"}
+	Local K, K1, K2, M1, M2, R, R1, R2, P := 1
 	If (HK = "")
 		Return
 	If (Section != "")
 		IniRead, HK, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section, % HK, % A_Space
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
-	If (K1 != "")
-		For I, V in K1 ~= "[<>]" ? LRPrefix : Prefix
-			K1 := StrReplace(K1, V[1], "", R)
-			, R ? (M1 .= "{" V[2] " Down}", M2 .= "{" V[2] " Up}") : 0
+	While P := RegExMatch(K1, "S)([<>])*([\^\+!#])", R, P) + StrLen(R)
+		M1 .= "{" V[R1] V[R2] " Down}", M2 .= "{" V[R1] V[R2] " Up}"
 	Return M1 . "{" K2 "}" . M2
 }
