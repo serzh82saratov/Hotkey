@@ -67,7 +67,7 @@ Hotkey_Mods:
 		Return
 	K["M" IsMod] := IsMod "+", K["P" IsMod] := Prefix[IsMod]
 	GoTo Hotkey_ViewMod
-
+	
 Hotkey_ModsUp:
 	If InStr(Hotkey_Arr("Hook"), "S")
 		Return
@@ -77,7 +77,7 @@ Hotkey_ModsUp:
 		Return
 
 Hotkey_ViewMod:
-	Hotkey := "", OnlyMods := 1, Hotkey_Value(Hotkey_ID(ControlHandle), K.Prefix Hotkey), Hotkey_Value(ControlHandle, K.Prefix Hotkey)
+	Hotkey := "", OnlyMods := 1, Hotkey_Value(Hotkey_ID(ControlHandle), ""), Hotkey_Value(ControlHandle, "")
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	Text := K.Mods = "" ? Hotkey_Arr("Empty") : K.Mods
 	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
