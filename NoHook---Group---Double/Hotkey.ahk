@@ -87,7 +87,7 @@ Hotkey_ViewNum:
 	 If InStr(Hotkey_Arr("Hook"), "N")
 		KeyName := Hotkey := GetKeyName(A_ThisHotkey)
 	Else
-		KeyName := GetKeyName(A_ThisHotkey), Hotkey := Format("sc{:x}", GetKeySC(A_ThisHotkey))
+		Hotkey := Format("sc{:x}", GetKeySC(A_ThisHotkey)), KeyName := GetKeyName(Hotkey)
 	GoTo, Hotkey_Put
 
 Hotkey_ViewSC:
@@ -107,6 +107,7 @@ Hotkey_Put:
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	Text := K.Mods KeyName = "" ? Hotkey_Arr("Empty") : K.Mods KeyName
 	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
+	
 Hotkey_GroupCheck:
 	If Hotkey_Group("Get", Hotkey_ID(ControlHandle)) && Hotkey_Group("SaveCheck", ControlHandle)
 		SetTimer, Hotkey_Group, -70
@@ -115,8 +116,8 @@ Hotkey_GroupCheck:
 Hotkey_Double:
 	If !K.Double
 	{
-		K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1
 		Hotkey_Value(Hotkey_ID(ControlHandle), ""), Hotkey_Value(ControlHandle, "")
+		K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1
 		Text := KeyName " & "
 		SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
 		Return
@@ -392,8 +393,6 @@ Hotkey_ModsSub(Value) {
 }
 
 	; -------------------------------------- Format --------------------------------------
-
-	; http://forum.script-coding.com/viewtopic.php?pid=105023#p105023
 
 Hotkey_HKToStr(HK) {
 	Static Prefix := {"^":"Ctrl","!":"Alt","+":"Shift","#":"Win","<":"L",">":"R"}
