@@ -65,7 +65,7 @@ Hotkey_Mods:
 	IsMod := InStr(Hotkey_Arr("Hook"), "D") ? A_ThisHotkey : SubStr(A_ThisHotkey, 2)
 	If (K["M" IsMod] != "")
 		Return
-	K["M" IsMod] := IsMod "+", K["P" IsMod] := Prefix[IsMod]
+	K["M" IsMod] := IsMod " + ", K["P" IsMod] := Prefix[IsMod]
 	GoTo Hotkey_ViewMod
 
 Hotkey_ModsUp:
@@ -431,7 +431,7 @@ Hotkey_HKToStr(HK) {
 	If K2 ~= "i)^(vk|sc[^r])"
 		K2 := Hotkey_Arr("OnlyEngSym") && EngSym.HasKey(K2) ? EngSym[K2] : GetKeyName(K2)
 	While P := RegExMatch(K1, "S)([<>])*([\^\+!#])", R, P) + StrLen(R)
-		M .= Prefix[R1] . Prefix[R2] . "+"
+		M .= Prefix[R1] . Prefix[R2] . " + "
 	Return M . (StrLen(K2) = 1 ? Format("{:U}", K2) : K2)
 }
 
@@ -442,6 +442,8 @@ Hotkey_HKToSend(HK, Section = "", FilePath = "") {
 		Return
 	If (Section != "")
 		IniRead, HK, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section, % HK, % A_Space
+	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K))
+		Return "{" K1 " Down}{" K2 " Down}{" K1 " Up}{" K2 " Up}"
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
 	While P := RegExMatch(K1, "S)([<>])*([\^\+!#])", R, P) + StrLen(R)
 		M1 .= "{" V[R1] V[R2] " Down}", M2 .= "{" V[R1] V[R2] " Up}"
