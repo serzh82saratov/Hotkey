@@ -41,11 +41,8 @@ Hotkey_Main(Param1, Param2 = "") {
 	If Param2
 	{
 		K := {}
-		If OnlyMods
-		{
+		If OnlyMods && !(OnlyMods := 0)
 			SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
-			OnlyMods := 0
-		}
 		ControlHandle := Param2
 		Hotkey_Arr("Hook", Hotkey_Options(ControlHandle))
 		PostMessage, 0x00B1, -1, -1, , ahk_id %ControlHandle%   ;  EM_SETSEL
@@ -53,7 +50,7 @@ Hotkey_Main(Param1, Param2 = "") {
 	Else If Hotkey_Arr("Hook")
 	{
 		Hotkey_Arr("Hook", 0)
-		If OnlyMods
+		If OnlyMods && !(OnlyMods := 0)
 			SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
 		SetTimer, Hotkey_IsRegFocus, -200
 	}
@@ -370,12 +367,15 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 }
 
 Hotkey_Equal(HK1, HK2) {
+	Local Bool
 	If (HK2 = "")
 		Return 0
 	If (HK1 = HK2)
 		Return 1
+	If Hotkey_EqualDouble(HK1, HK2, Bool) || Hotkey_EqualDouble(HK2, HK1, Bool)
+		Return Bool
 	If !(HK1 ~= "S)[\^\+!#]") || !(HK2 ~= "S)[\^\+!#]")
-		Return 0
+		Return 0		
 	If (HK1 ~= "S)[<>]") && (HK2 ~= "S)[<>]")
 		Return 0
 	Return (Hotkey_ModsSub(HK1) = Hotkey_ModsSub(HK2))
@@ -390,6 +390,23 @@ Hotkey_ModsSub(Value) {
 	Value := StrReplace(Value, "!!", "!", , 1)
 	Value := StrReplace(Value, "++", "+", , 1)
 	Return StrReplace(Value, "##", "#", , 1)
+}
+
+Hotkey_EqualDouble(HK1, HK2, ByRef Bool) {
+	Static Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
+					,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"}
+	Local K, K1, K2
+	If InStr(HK1, " & ") && !InStr(HK2, " & ") && (HK2 ~= "S)[\^\+!#]")
+	&& (HK1 ~= "S)(L|R)(Ctrl|Alt|Shift|Win) & ") 
+	&& !(HK1 ~= "S) & (L|R)(Ctrl|Alt|Shift|Win)")
+	{
+		RegExMatch(HK1, "S)^\s*(.*?) & (.*?)\s*$", K)
+		K := Prefix[K1] . K2
+		If (HK2 ~= "S)[<>]")
+			Return 1, Bool := K = HK2
+		Return 1, Bool := RegExReplace(K, "(<|>)") = HK2
+	}
+	Return 0
 }
 
 	; -------------------------------------- Format --------------------------------------
