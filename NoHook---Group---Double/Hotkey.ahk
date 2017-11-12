@@ -142,10 +142,10 @@ Hotkey_InitHotkeys() {
 	Static nmMods := "LAlt|RAlt|LCtrl|RCtrl|LShift|RShift|LWin|RWin"
 	, nmMouse := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
 	, scSymb := "2|3|4|5|6|7|8|9|A|B|C|D|10|11|12|13|14|15|16|17|18|19|1A|1B|"
-		. "1E|1F|20|21|22|23|24|25|26|27|28|29|2B|2C|2D|2E|2F|30|31|32|33|34|35"
+		. "1E|1F|20|21|22|23|24|25|26|27|28|29|2B|2C|2D|2E|2F|30|31|32|33|34|35|56"
 	, scOther := "1|E|F|1C|37|39|3A|3B|3C|3D|3E|3F|40|41|42|43|44|45|46|4A|4E|54|57|58|63|64|65|"
-		. "66|67|68|69|6A|6B|6C|6D|6E|76|11C|135|145|147|148|149|14B|14D|14F|150|151|152|153|15D"
-	, vkNum := "2E|6E|60|2D|61|23|62|28|63|22|64|25|65|C|66|27|67|24|68|26|69"	; , scNum := "53|52|4F|50|51|4B|4C|4D|47|48|49"
+		. "66|67|68|69|6A|6B|6C|6D|6E|76|7C|11C|135|145|147|148|149|14B|14D|14F|150|151|152|153|15D"
+	, vkNum := "2E|6E|60|2D|61|23|62|28|63|22|64|25|65|C|66|27|67|24|68|26|69"	; , scNum := "53|52|4F|50|51|4B|4C|4D|47|48|49|59"
 	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
 	S_BatchLines := A_BatchLines
 	SetBatchLines, -1
@@ -313,10 +313,10 @@ Hotkey_IniRead(Name, Section = "", FilePath = "") {
 }
 
 Hotkey_IniWrite(ID, Section = "", FilePath = "") {
-	Local Key
-	Key := (ID + 0 = "") ? ID : Hotkey_ID(ID)
-	If (Key != "")
-		IniWrite, % Hotkey_Value(ID), % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Key
+	Local Name
+	Name := (ID + 0 = "") ? ID : Hotkey_ID(ID)
+	If (Name != "")
+		IniWrite, % Hotkey_Value(ID), % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Name
 }
 
 	; -------------------------------------- Group --------------------------------------
@@ -430,7 +430,7 @@ Hotkey_HKToStr(HK) {
 				,"sc1E":"A","sc1F":"S","sc20":"D","sc21":"F","sc22":"G","sc23":"H"
 				,"sc24":"J","sc25":"K","sc26":"L","sc27":"`;","sc28":"'","sc29":"``"
 				,"sc2B":"\","sc2C":"Z","sc2D":"X","sc2E":"C","sc2F":"V","sc30":"B"
-				,"sc31":"N","sc32":"M","sc33":",","sc34":".","sc35":"/"
+				,"sc31":"N","sc32":"M","sc33":",","sc34":".","sc35":"/","sc56":"\"
 
 				,"vk31":"1","vk32":"2","vk33":"3","vk34":"4","vk35":"5","vk36":"6"
 				,"vk37":"7","vk38":"8","vk39":"9","vk30":"0","vkBD":"-","vkBB":"="
@@ -439,7 +439,7 @@ Hotkey_HKToStr(HK) {
 				,"vk41":"A","vk53":"S","vk44":"D","vk46":"F","vk47":"G","vk48":"H"
 				,"vk4A":"J","vk4B":"K","vk4C":"L","vkBA":"`;","vkDE":"'","vkC0":"``"
 				,"vkDC":"\","vk5A":"Z","vk58":"X","vk43":"C","vk56":"V","vk42":"B"
-				,"vk4E":"N","vk4D":"M","vkBC":",","vkBE":".","vkBF":"/"}
+				,"vk4E":"N","vk4D":"M","vkBC":",","vkBE":".","vkBF":"/","vkE2":"\"}
 
 	Local K, K1, K2, R, R1, R2, M, P := 1
 	If InStr(HK, " & ")
