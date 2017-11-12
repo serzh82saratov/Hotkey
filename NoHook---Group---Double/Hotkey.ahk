@@ -17,6 +17,7 @@ Hotkey_Register(Controls*) {
 	If IsStart
 		Return Hotkey_IsRegFocus()
 	#HotkeyInterval 0
+	OnMessage(0x203, "Hotkey_WM_LBUTTONDBLCLK")  ;	WM_LBUTTONDBLCLK
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_EventFocus", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
 	Hotkey_InitHotkeys(), Hotkey_IsRegFocus(), IsStart := 1
 }
@@ -213,6 +214,15 @@ Hotkey_IsRegFocus() {
 	Hotkey_ID(hFocus) != "" ? Hotkey_Main("Control", hFocus) : 0
 }
 
+Hotkey_WM_LBUTTONDBLCLK(wp, lp, msg, hwnd) {
+	If (Hotkey_ID(hwnd) = "")
+		Return
+	SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %hwnd%
+	Hotkey_Value(hwnd, ""), Hotkey_Value(Hotkey_ID(hwnd), "")
+	Sleep 50
+	PostMessage, 0x00B1, -1, -1, , ahk_id %hwnd%   ;  EM_SETSEL
+}
+
 Hotkey_EventFocus(hWinEventHook, event, hwnd) {
 	Hotkey_ID(hwnd) != "" ? Hotkey_Main("Control", hwnd) : Hotkey_Main("Control")
 }
@@ -381,17 +391,6 @@ Hotkey_Equal(HK1, HK2) {
 	Return (Hotkey_ModsSub(HK1) = Hotkey_ModsSub(HK2))
 }
 
-Hotkey_ModsSub(Value) {
-	If !(Value ~= "[<>]")
-		Return Value
-	Value := StrReplace(Value, "<")
-	Value := StrReplace(Value, ">")
-	Value := StrReplace(Value, "^^", "^", , 1)
-	Value := StrReplace(Value, "!!", "!", , 1)
-	Value := StrReplace(Value, "++", "+", , 1)
-	Return StrReplace(Value, "##", "#", , 1)
-}
-
 Hotkey_EqualDouble(HK1, HK2, ByRef Bool) {
 	Static Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
 					,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"}
@@ -407,6 +406,17 @@ Hotkey_EqualDouble(HK1, HK2, ByRef Bool) {
 		Return 1, Bool := RegExReplace(K, "(<|>)") = HK2
 	}
 	Return 0
+}
+
+Hotkey_ModsSub(Value) {
+	If !(Value ~= "[<>]")
+		Return Value
+	Value := StrReplace(Value, "<")
+	Value := StrReplace(Value, ">")
+	Value := StrReplace(Value, "^^", "^", , 1)
+	Value := StrReplace(Value, "!!", "!", , 1)
+	Value := StrReplace(Value, "++", "+", , 1)
+	Return StrReplace(Value, "##", "#", , 1)
 }
 
 	; -------------------------------------- Format --------------------------------------
