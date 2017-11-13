@@ -38,7 +38,9 @@ Hotkey_Main(Param1, Param2 = "") {
 	Local IsMod, Text
 	
 	If Param1 = GetMod
-		Return K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
+		Return K.MLCtrl 
+	If Param1 = Clean
+		Return K := {}, OnlyMods := 0, Hotkey := KeyName := ""
 	If Param2
 	{
 		K := {}
@@ -218,7 +220,7 @@ Hotkey_WM_LBUTTONDBLCLK(wp, lp, msg, hwnd) {
 	If (Hotkey_ID(hwnd) = "")
 		Return
 	SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %hwnd%
-	Hotkey_Value(hwnd, ""), Hotkey_Value(Hotkey_ID(hwnd), "")
+	Hotkey_Value(hwnd, ""), Hotkey_Value(Hotkey_ID(hwnd), ""), Hotkey_Main("Clean")
 	Sleep 50
 	PostMessage, 0x00B1, -1, -1, , ahk_id %hwnd%   ;  EM_SETSEL
 }
@@ -237,6 +239,10 @@ Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, i
 Hotkey_Arr(P*) {
 	Static Arr := {"Empty":"Нет"}
 	Return P.MaxIndex() = 1 ? Arr[P[1]] : (Arr[P[1]] := P[2])
+}
+
+Hotkey_Hook(Option) {
+	Return Hotkey_Arr("Hook") && !!InStr(Hotkey_Arr("Hook"), Option)
 }
 
 Hotkey_ID(P*) {
@@ -262,10 +268,6 @@ Hotkey_ChangeOption(ID, Option) {
 	If RegExMatch(Option, "i)G(\d+)", g)
 		Hotkey_Group("Set", Name, g1)
 	Return Hotkey_Options(Hwnd, Option)
-}
-
-Hotkey_Hook(Option) {
-	Return Hotkey_Arr("Hook") && !!InStr(Hotkey_Arr("Hook"), Option)
 }
 
 Hotkey_Delete(ID, Destroy = 0) {
