@@ -38,7 +38,7 @@ Hotkey_Main(Param1, Param2 = "") {
 	Local IsMod, Text
 	
 	If Param1 = GetMod
-		Return K.MLCtrl 
+		Return K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	If Param1 = Clean
 		Return K := {}, OnlyMods := 0, Hotkey := KeyName := ""
 	If Param2
