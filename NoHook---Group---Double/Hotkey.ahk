@@ -90,6 +90,13 @@ Hotkey_ViewNum:
 		Hotkey := Format("sc{:x}", GetKeySC(A_ThisHotkey)), KeyName := GetKeyName(Hotkey)
 	GoTo, Hotkey_Put
 
+Hotkey_ViewNumExc:
+	If InStr(Hotkey_Arr("Hook"), "N")
+		(KeyName := GetKeyState("NumLock", "T") ? "Numpad5" : "NumpadClear"), Hotkey := "vkC"
+	Else
+		KeyName := "NumpadClear", Hotkey := A_ThisHotkey
+	GoTo, Hotkey_Put
+	
 Hotkey_ViewSC:
 	KeyName := Hotkey_Arr("OnlyEngSym") ? EngSym[A_ThisHotkey] : Format("{:U}", GetKeyName(A_ThisHotkey))
 	Hotkey := A_ThisHotkey
@@ -147,7 +154,7 @@ Hotkey_InitHotkeys() {
 		. "1E|1F|20|21|22|23|24|25|26|27|28|29|2B|2C|2D|2E|2F|30|31|32|33|34|35|56"
 	, scOther := "1|E|F|1C|37|39|3A|3B|3C|3D|3E|3F|40|41|42|43|44|45|46|4A|4E|54|57|58|63|64|65|"
 		. "66|67|68|69|6A|6B|6C|6D|6E|76|7C|11C|135|145|147|148|149|14B|14D|14F|150|151|152|153|15D"
-	, vkNum := "21|22|23|24|25|26|27|28|2D|2E|60|61|62|63|64|C|65|66|67|68|69|6E"	; , scNum := "53|52|4F|50|51|4B|4D|47|48|49|4C|59"
+	, vkNum := "21|22|23|24|25|26|27|28|2D|2E|60|61|62|63|64|66|67|68|69|6E"	; , scNum := "53|52|4F|50|51|4B|4D|47|48|49|4C|59"
 	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
 	S_BatchLines := A_BatchLines
 	SetBatchLines, -1
@@ -174,6 +181,8 @@ Hotkey_InitHotkeys() {
 		Hotkey, % GetKeyName("sc" A_LoopField), Hotkey_View
 	Loop, Parse, vkNum, |
 		Hotkey, % "vk" A_LoopField, Hotkey_ViewNum
+	Hotkey, sc4C, Hotkey_ViewNumExc  ;	NumpadClear
+	Hotkey, sc59, Hotkey_ViewNumExc  ;	NumpadClear
 	Loop, Parse, vkOther, |
 		Hotkey, % GetKeyName("vk" A_LoopField), Hotkey_View
 	Hotkey, IF, Hotkey_Hook("L") && GetKeyState("RButton"`, "P")
