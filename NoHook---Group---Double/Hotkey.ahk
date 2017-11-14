@@ -188,7 +188,7 @@ Hotkey_InitHotkeys() {
 		Hotkey % Ceil(A_Index / 32) "Joy" Mod(A_Index - 1, 32) + 1, Hotkey_View
 	SetFormat, IntegerFast, %S_FormatInteger%
 	Hotkey, IF, Hotkey_IsRegControl()
-	Hotkey, RButton, Hotkey_RButtonBlock
+	Hotkey, RButton, Hotkey_Return
 	Hotkey, RButton Up, Hotkey_Return
 	Hotkey, IF, Hotkey_Arr("Hook") && !Hotkey_Hook("K")
 	Hotkey, AppsKey Up, Hotkey_Return
@@ -196,9 +196,7 @@ Hotkey_InitHotkeys() {
 	Hotkey, IF
 	SetBatchLines, %S_BatchLines%
 	Return
-
-	Hotkey_RButtonBlock:
-		Click
+	
 	Hotkey_Return:
 		Return
 }
