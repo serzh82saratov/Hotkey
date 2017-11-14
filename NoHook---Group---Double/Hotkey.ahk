@@ -90,7 +90,7 @@ Hotkey_ViewNum:
 		Hotkey := Format("sc{:x}", GetKeySC(A_ThisHotkey)), KeyName := GetKeyName(Hotkey)
 	GoTo, Hotkey_Put
 
-Hotkey_ViewNumExc:
+Hotkey_ViewNumExcept:
 	If InStr(Hotkey_Arr("Hook"), "N")
 		GetKeyState("NumLock", "T") ? (KeyName := "Numpad5", Hotkey := "vk65") : (KeyName := "NumpadClear", Hotkey := "vkC")
 	Else
@@ -154,7 +154,7 @@ Hotkey_InitHotkeys(Option = 1) {
 		. "1E|1F|20|21|22|23|24|25|26|27|28|29|2B|2C|2D|2E|2F|30|31|32|33|34|35|56"
 	, scOther := "1|E|F|1C|37|39|3A|3B|3C|3D|3E|3F|40|41|42|43|44|45|46|4A|4E|54|57|58|63|64|65|"
 		. "66|67|68|69|6A|6B|6C|6D|6E|76|7C|11C|135|145|147|148|149|14B|14D|14F|150|151|152|153|15D"
-	, vkNum := "21|22|23|24|25|26|27|28|2D|2E|60|61|62|63|64|66|67|68|69|6E"	; , scNum := "53|52|4F|50|51|4B|4D|47|48|49|4C|59"
+	, vkNum := "21|22|23|24|25|26|27|28|2D|2E|60|61|62|63|64|66|67|68|69|6E|C|65"	; , scNum := "53|52|4F|50|51|4B|4D|47|48|49|4C|59"
 	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
 	S_BatchLines := A_BatchLines
 	Option := Option ? "On" : "Off"
@@ -182,8 +182,7 @@ Hotkey_InitHotkeys(Option = 1) {
 		Hotkey, % GetKeyName("sc" A_LoopField), Hotkey_View, % Option
 	Loop, Parse, vkNum, |
 		Hotkey, % "vk" A_LoopField, Hotkey_ViewNum, % Option
-	Hotkey, sc4C, Hotkey_ViewNumExc, % Option  ;	NumpadClear
-	Hotkey, sc59, Hotkey_ViewNumExc, % Option  ;	NumpadClear
+	Hotkey, sc59, Hotkey_ViewNumExcept, % Option  ;	NumpadClear
 	Loop, Parse, vkOther, |
 		Hotkey, % GetKeyName("vk" A_LoopField), Hotkey_View, % Option
 	Hotkey, IF, Hotkey_Hook("L") && GetKeyState("RButton"`, "P")
