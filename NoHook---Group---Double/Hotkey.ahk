@@ -92,7 +92,7 @@ Hotkey_ViewNum:
 
 Hotkey_ViewNumExc:
 	If InStr(Hotkey_Arr("Hook"), "N")
-		(KeyName := GetKeyState("NumLock", "T") ? "Numpad5" : "NumpadClear"), Hotkey := "vkC"
+		GetKeyState("NumLock", "T") ? (KeyName := "Numpad5", Hotkey := "vk65") : (KeyName := "NumpadClear", Hotkey := "vkC")
 	Else
 		KeyName := "NumpadClear", Hotkey := A_ThisHotkey
 	GoTo, Hotkey_Put
