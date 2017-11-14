@@ -146,7 +146,7 @@ Hotkey_RButton:
 	GoTo, Hotkey_Put
 }
 
-Hotkey_InitHotkeys() {
+Hotkey_InitHotkeys(Option = 1) {
 	Local S_FormatInteger, S_BatchLines
 	Static nmMods := "LAlt|RAlt|LCtrl|RCtrl|LShift|RShift|LWin|RWin"
 	, nmMouse := "MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2"
@@ -157,6 +157,7 @@ Hotkey_InitHotkeys() {
 	, vkNum := "21|22|23|24|25|26|27|28|2D|2E|60|61|62|63|64|66|67|68|69|6E"	; , scNum := "53|52|4F|50|51|4B|4D|47|48|49|4C|59"
 	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
 	S_BatchLines := A_BatchLines
+	Option := Option ? "On" : "Off"
 	SetBatchLines, -1
 	#IF Hotkey_IsRegControl()
 	#IF Hotkey_Hook("K")
@@ -168,40 +169,40 @@ Hotkey_InitHotkeys() {
 	#IF
 	Hotkey, IF, Hotkey_Hook("M")
 	Loop, Parse, nmMouse, |
-		Hotkey, % A_LoopField, Hotkey_View
+		Hotkey, % A_LoopField, Hotkey_View, % Option
 	Hotkey, IF, Hotkey_Hook("K")
 	Loop, Parse, nmMods, |
 	{
-		Hotkey, % A_LoopField, Hotkey_Mods
-		Hotkey, % A_LoopField " Up", Hotkey_ModsUp
+		Hotkey, % A_LoopField, Hotkey_Mods, % Option
+		Hotkey, % A_LoopField " Up", Hotkey_ModsUp, % Option
 	}
 	Loop, Parse, scSymb, |
-		Hotkey, % "sc" A_LoopField, Hotkey_ViewSC
+		Hotkey, % "sc" A_LoopField, Hotkey_ViewSC, % Option
 	Loop, Parse, scOther, |
-		Hotkey, % GetKeyName("sc" A_LoopField), Hotkey_View
+		Hotkey, % GetKeyName("sc" A_LoopField), Hotkey_View, % Option
 	Loop, Parse, vkNum, |
-		Hotkey, % "vk" A_LoopField, Hotkey_ViewNum
-	Hotkey, sc4C, Hotkey_ViewNumExc  ;	NumpadClear
-	Hotkey, sc59, Hotkey_ViewNumExc  ;	NumpadClear
+		Hotkey, % "vk" A_LoopField, Hotkey_ViewNum, % Option
+	Hotkey, sc4C, Hotkey_ViewNumExc, % Option  ;	NumpadClear
+	Hotkey, sc59, Hotkey_ViewNumExc, % Option  ;	NumpadClear
 	Loop, Parse, vkOther, |
-		Hotkey, % GetKeyName("vk" A_LoopField), Hotkey_View
+		Hotkey, % GetKeyName("vk" A_LoopField), Hotkey_View, % Option
 	Hotkey, IF, Hotkey_Hook("L") && GetKeyState("RButton"`, "P")
-	Hotkey, LButton, Hotkey_Return
+	Hotkey, LButton, Hotkey_Return, % Option
 	Hotkey, IF, Hotkey_Hook("R") || Hotkey_Hook("L")
-	Hotkey, RButton, Hotkey_Return
-	Hotkey, RButton Up, Hotkey_RButton
+	Hotkey, RButton, Hotkey_Return, % Option
+	Hotkey, RButton Up, Hotkey_RButton, % Option
 	S_FormatInteger := A_FormatInteger
 	SetFormat, IntegerFast, D
 	Hotkey, IF, Hotkey_Hook("J") && !Hotkey_Main("GetMod")
 	Loop, 128
-		Hotkey % Ceil(A_Index / 32) "Joy" Mod(A_Index - 1, 32) + 1, Hotkey_View
+		Hotkey % Ceil(A_Index / 32) "Joy" Mod(A_Index - 1, 32) + 1, Hotkey_View, % Option
 	SetFormat, IntegerFast, %S_FormatInteger%
 	Hotkey, IF, Hotkey_IsRegControl()
-	Hotkey, RButton, Hotkey_Return
-	Hotkey, RButton Up, Hotkey_Return
+	Hotkey, RButton, Hotkey_Return, % Option
+	Hotkey, RButton Up, Hotkey_Return, % Option
 	Hotkey, IF, Hotkey_Arr("Hook") && !Hotkey_Hook("K")
-	Hotkey, AppsKey Up, Hotkey_Return
-	Hotkey, +F10, Hotkey_Return
+	Hotkey, AppsKey Up, Hotkey_Return, % Option
+	Hotkey, +F10, Hotkey_Return, % Option
 	Hotkey, IF
 	SetBatchLines, %S_BatchLines%
 	Return
