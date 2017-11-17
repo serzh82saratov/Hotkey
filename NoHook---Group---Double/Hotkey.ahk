@@ -391,7 +391,7 @@ Hotkey_Equal(HK1, HK2) {
 		Return 0
 	If (HK1 = HK2)
 		Return 1
-	If Hotkey_EqualDouble(HK1, HK2, Bool) || Hotkey_EqualDouble(HK2, HK1, Bool)
+	If Hotkey_EqualDouble(HK1, HK2, Bool)
 		Return Bool
 	If !(HK1 ~= "S)[\^\+!#]") || !(HK2 ~= "S)[\^\+!#]")
 		Return 0		
@@ -403,18 +403,15 @@ Hotkey_Equal(HK1, HK2) {
 Hotkey_EqualDouble(HK1, HK2, ByRef Bool) {
 	Static Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
 					,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"}
-	Local K, K1, K2
-	If InStr(HK1, " & ") && !InStr(HK2, " & ") && (HK2 ~= "S)[\^\+!#]")
-	&& (HK1 ~= "S)(L|R)(Ctrl|Alt|Shift|Win) & ") 
-	&& !(HK1 ~= "S) & (L|R)(Ctrl|Alt|Shift|Win)")
-	{
-		RegExMatch(HK1, "S)^\s*(.*?) & (.*?)\s*$", K)
-		K := Prefix[K1] . K2
-		If (HK2 ~= "S)[<>]")
-			Return 1, Bool := K = HK2
-		Return 1, Bool := RegExReplace(K, "(<|>)") = HK2
-	}
-	Return 0
+	Local K, K1, K2, i, D, P, R
+	If !(!!InStr(HK1, " & ") && i:=1) ^ (!!InStr(HK2, " & ") && i:=2)
+		Return Bool := 0
+	D := HK%i%, P := [HK2,HK1][i]
+	If !((1, RegExReplace(P, "[\^\+!#]", , R, 2)) && (R = 1)
+	&& RegExMatch(D, "^\s*(.*?) & (.*?)\s*$", K)
+	&& (Prefix[K1] && !Prefix[K2]) && (1, D := Prefix[K1] . K2))
+		Return Bool := 0
+	Return 1, Bool := SubStr(D, 1 + !(P ~= "S)[<>]")) = P
 }
 
 Hotkey_ModsSub(Value) {
