@@ -406,7 +406,7 @@ Hotkey_EqualDouble(HK1, HK2, ByRef Bool) {
 	Local K, K1, K2, i, D, P, R
 	If !(!!InStr(HK1, " & ") && i:=1) ^ (!!InStr(HK2, " & ") && i:=2)
 		Return Bool := 0
-	D := HK%i%, P := [HK2,HK1][i]
+	D := HK%i%, P := i = 1 ? HK2 : HK1
 	If !((1, RegExReplace(P, "[\^\+!#]", , R, 2)) && (R = 1)
 	&& RegExMatch(D, "^\s*(.*?) & (.*?)\s*$", K)
 	&& (Prefix[K1] && !Prefix[K2]) && (1, D := Prefix[K1] . K2))
