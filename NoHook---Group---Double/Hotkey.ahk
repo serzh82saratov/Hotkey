@@ -414,15 +414,15 @@ Hotkey_EqualDouble(HK1, HK2, ByRef Bool) {
 	Return 1, Bool := SubStr(D, 1 + !(P ~= "S)[<>]")) = P
 }
 
-Hotkey_ModsSub(Value) {
-	If !(Value ~= "[<>]")
-		Return Value
-	Value := StrReplace(Value, "<")
-	Value := StrReplace(Value, ">")
-	Value := StrReplace(Value, "^^", "^", , 1)
-	Value := StrReplace(Value, "!!", "!", , 1)
-	Value := StrReplace(Value, "++", "+", , 1)
-	Return StrReplace(Value, "##", "#", , 1)
+Hotkey_ModsSub(HK) {
+	If !(HK ~= "[<>]")
+		Return HK
+	HK := StrReplace(HK, "<")
+	HK := StrReplace(HK, ">")
+	HK := StrReplace(HK, "^^", "^", , 1)
+	HK := StrReplace(HK, "!!", "!", , 1)
+	HK := StrReplace(HK, "++", "+", , 1)
+	Return StrReplace(HK, "##", "#", , 1)
 }
 
 	; -------------------------------------- Format --------------------------------------
