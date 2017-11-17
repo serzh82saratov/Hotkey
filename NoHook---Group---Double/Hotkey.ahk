@@ -393,10 +393,10 @@ Hotkey_Equal(HK1, HK2) {
 		Return 1	
 	If (HK1 ~= "S)[<>]") && (HK2 ~= "S)[<>]")
 		Return 0
+	If !(HK1 ~= "S)[\^\+!#]") || !(HK2 ~= "S)[\^\+!#]")
+		Return 0
 	If Hotkey_EqualDouble(HK1, HK2, Bool)
 		Return Bool
-	If !(HK1 ~= "S)[\^\+!#]") || !(HK2 ~= "S)[\^\+!#]")
-		Return 0	
 	Return (Hotkey_ModsSub(HK1) = Hotkey_ModsSub(HK2))
 }
 
