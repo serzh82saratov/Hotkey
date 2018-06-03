@@ -2,47 +2,6 @@
 	;  E-Mail: serzh82saratov@mail.ru
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 
-#NoEnv
-#SingleInstance Force
-; #UseHook
-
-Hotkey_Arr("OnlyEngSym", True)
-; Hotkey_Arr("ResetAlways", True)
-
-Gui, +AlwaysOnTop
-PathIni = %A_ScriptDir%\Hotkey.ini
-Gui, Add, Edit, Center w300 r1 hwndhMyHotkey1 gWriteIni, % Hotkey_Read("MyHotkey1", "Section", PathIni)
-Gui, Add, Edit, Center wp y+10 r1 hwndhMyHotkey2 gWriteIni, % Hotkey_Read("MyHotkey2", "Section", PathIni)
-Hotkey_Register(["MyHotkey1",hMyHotkey1,""],["MyHotkey2",hMyHotkey2,""])
-Gui, Add, Edit, Center vText wp
-Gui, Show
-
-var := 1
-#If !Hotkey_Arr("Hook") && var
-1::2
-2::MsgBox sc3
-Space::MsgBox Space
-#If
-Return
-
-
-WriteIni(CtrlHwnd) {
-    Global PathIni
-    Name := Hotkey_ID(CtrlHwnd)
-    Value := Hotkey_Value(CtrlHwnd)
-    IniWrite, % Value, % PathIni, Section, % Name
-    GuiControl, , Text, % Name " = " Value
-}
-
-GuiClose() {
-    ExitApp
-}
-
-
-	;  Автор - serzh82saratov
-	;  E-Mail: serzh82saratov@mail.ru
-	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
-
 Hotkey_Register(Controls*) {
 	Static IsStart
 	Local k, v, g, g1
