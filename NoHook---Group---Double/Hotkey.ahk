@@ -2,6 +2,47 @@
 	;  E-Mail: serzh82saratov@mail.ru
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 
+#NoEnv
+#SingleInstance Force
+; #UseHook
+
+Hotkey_Arr("OnlyEngSym", True)
+; Hotkey_Arr("ResetAlways", True)
+
+Gui, +AlwaysOnTop
+PathIni = %A_ScriptDir%\Hotkey.ini
+Gui, Add, Edit, Center w300 r1 hwndhMyHotkey1 gWriteIni, % Hotkey_Read("MyHotkey1", "Section", PathIni)
+Gui, Add, Edit, Center wp y+10 r1 hwndhMyHotkey2 gWriteIni, % Hotkey_Read("MyHotkey2", "Section", PathIni)
+Hotkey_Register(["MyHotkey1",hMyHotkey1,""],["MyHotkey2",hMyHotkey2,""])
+Gui, Add, Edit, Center vText wp
+Gui, Show
+
+var := 1
+#If !Hotkey_Arr("Hook") && var
+1::2
+2::MsgBox sc3
+Space::MsgBox Space
+#If
+Return
+
+
+WriteIni(CtrlHwnd) {
+    Global PathIni
+    Name := Hotkey_ID(CtrlHwnd)
+    Value := Hotkey_Value(CtrlHwnd)
+    IniWrite, % Value, % PathIni, Section, % Name
+    GuiControl, , Text, % Name " = " Value
+}
+
+GuiClose() {
+    ExitApp
+}
+
+
+	;  Автор - serzh82saratov
+	;  E-Mail: serzh82saratov@mail.ru
+	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
+
 Hotkey_Register(Controls*) {
 	Static IsStart
 	Local k, v, g, g1
@@ -19,7 +60,9 @@ Hotkey_Register(Controls*) {
 	#HotkeyInterval 0
 	OnMessage(0x203, "Hotkey_WM_LBUTTONDBLCLK")  ;	WM_LBUTTONDBLCLK
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_EventFocus", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
-	Hotkey_InitHotkeys(), Hotkey_IsRegFocus(), IsStart := 1
+	If !Hotkey_Arr("ResetAlways")
+		Hotkey_InitHotkeys()
+	Hotkey_IsRegFocus(), IsStart := 1
 }
 
 Hotkey_Main(Param1, Param2 = "") {
@@ -36,7 +79,7 @@ Hotkey_Main(Param1, Param2 = "") {
 				,"sc2B":"\","sc2C":"Z","sc2D":"X","sc2E":"C","sc2F":"V","sc30":"B"
 				,"sc31":"N","sc32":"M","sc33":",","sc34":".","sc35":"/","sc56":"\"}
 	Local IsMod, Text
-	
+
 	If Param1 = GetMod
 		Return K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	If Param1 = Clean
@@ -96,7 +139,7 @@ Hotkey_ViewNumExcept:
 	Else
 		KeyName := "NumpadClear", Hotkey := A_ThisHotkey
 	GoTo, Hotkey_Put
-	
+
 Hotkey_ViewSC:
 	KeyName := Hotkey_Arr("OnlyEngSym") ? EngSym[A_ThisHotkey] : Format("{:U}", GetKeyName(A_ThisHotkey))
 	Hotkey := A_ThisHotkey
@@ -114,7 +157,7 @@ Hotkey_Put:
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	Text := K.Mods KeyName = "" ? Hotkey_Arr("Empty") : K.Mods KeyName
 	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
-	
+
 Hotkey_GroupCheck:
 	If Hotkey_Group("Get", Hotkey_ID(ControlHandle)) && Hotkey_Group("SaveCheck", ControlHandle)
 		SetTimer, Hotkey_Group, -70
@@ -205,7 +248,7 @@ Hotkey_InitHotkeys(Option = 1) {
 	Hotkey, IF
 	SetBatchLines, %S_BatchLines%
 	Return
-	
+
 	Hotkey_Return:
 		Return
 }
@@ -233,7 +276,11 @@ Hotkey_WM_LBUTTONDBLCLK(wp, lp, msg, hwnd) {
 }
 
 Hotkey_EventFocus(hWinEventHook, event, hwnd) {
-	Hotkey_ID(hwnd) != "" ? Hotkey_Main("Control", hwnd) : Hotkey_Main("Control")
+	If (Hotkey_ID(hwnd) != "")
+		(!Hotkey_Arr("Hook") && Hotkey_Arr("ResetAlways") ? Hotkey_InitHotkeys() : 0)
+		, Hotkey_Main("Control", hwnd)
+	Else
+		Hotkey_Main("Control"), (Hotkey_Arr("ResetAlways") ? Hotkey_InitHotkeys(0) : 0)
 }
 
 Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, idProcess, idThread, dwFlags) {
@@ -390,7 +437,7 @@ Hotkey_Equal(HK1, HK2) {
 	If (HK2 = "")
 		Return 0
 	If (HK1 = HK2)
-		Return 1	
+		Return 1
 	If (HK1 ~= "S)[<>]") && (HK2 ~= "S)[<>]")
 		Return 0
 	If Hotkey_EqualDouble(HK1, HK2, Bool)
