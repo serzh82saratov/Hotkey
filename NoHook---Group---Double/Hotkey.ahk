@@ -1,3 +1,4 @@
+
 	;  Автор - serzh82saratov
 	;  E-Mail: serzh82saratov@mail.ru
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
@@ -234,12 +235,8 @@ Hotkey_WM_LBUTTONDBLCLK(wp, lp, msg, hwnd) {
 	PostMessage, 0x00B1, -1, -1, , ahk_id %hwnd%   ;  EM_SETSEL
 }
 
-Hotkey_EventFocus(hWinEventHook, event, hwnd) {
-	If (Hotkey_ID(hwnd) != "")
-		(!Hotkey_Arr("Hook") && Hotkey_Arr("ResetAlways") ? Hotkey_InitHotkeys() : 0)
-		, Hotkey_Main("Control", hwnd)
-	Else
-		Hotkey_Main("Control"), (Hotkey_Arr("ResetAlways") ? Hotkey_InitHotkeys(0) : 0)
+Hotkey_EventFocus(hWinEventHook, event, hwnd) {  
+	Hotkey_ID(hwnd) != "" ? Hotkey_Main("Control", hwnd) : Hotkey_Main("Control")  
 }
 
 Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, idProcess, idThread, dwFlags) {
