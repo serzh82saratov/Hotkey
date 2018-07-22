@@ -104,7 +104,13 @@ Hotkey_ViewSC:
 	Hotkey := A_ThisHotkey
 	GoTo, Hotkey_Put
 
-Hotkey_View:
+Hotkey_ViewJoy:
+	If InStr(Hotkey_Arr("Hook"), "W")
+		Return
+	KeyName := Hotkey := A_ThisHotkey
+	GoTo, Hotkey_Put
+	
+Hotkey_View: 
 	KeyName := Hotkey := A_ThisHotkey
 
 Hotkey_Put:
@@ -158,6 +164,7 @@ Hotkey_InitHotkeys(Option = 1) {
 		. "66|67|68|69|6A|6B|6C|6D|6E|76|7C|11C|135|145|147|148|149|14B|14D|14F|150|151|152|153|15D"
 	, vkNum := "21|22|23|24|25|26|27|28|2D|2E|60|61|62|63|64|66|67|68|69|6E|C|65"	; , scNum := "53|52|4F|50|51|4B|4D|47|48|49|4C|59"
 	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
+	
 	S_BatchLines := A_BatchLines
 	Option := Option ? "On" : "Off"
 	SetBatchLines, -1
@@ -180,8 +187,8 @@ Hotkey_InitHotkeys(Option = 1) {
 	}
 	Loop, Parse, scSymb, |
 		Hotkey, % "sc" A_LoopField, Hotkey_ViewSC, % Option
-	Loop, Parse, scOther, |
-		Hotkey, % GetKeyName("sc" A_LoopField), Hotkey_View, % Option
+	Loop, Parse, scOther, | 
+		Hotkey, % GetKeyName("sc" A_LoopField), Hotkey_View, % Option 
 	Loop, Parse, vkNum, |
 		Hotkey, % "vk" A_LoopField, Hotkey_ViewNum, % Option
 	Hotkey, sc59, Hotkey_ViewNumExcept, % Option  ;	NumpadClear
@@ -196,7 +203,7 @@ Hotkey_InitHotkeys(Option = 1) {
 	SetFormat, IntegerFast, D
 	Hotkey, IF, Hotkey_Hook("J") && !Hotkey_Main("GetMod")
 	Loop, 128
-		Hotkey % Ceil(A_Index / 32) "Joy" Mod(A_Index - 1, 32) + 1, Hotkey_View, % Option
+		Hotkey % Ceil(A_Index / 32) "Joy" Mod(A_Index - 1, 32) + 1, Hotkey_ViewJoy, % Option
 	SetFormat, IntegerFast, %S_FormatInteger%
 	Hotkey, IF, Hotkey_IsRegControl()
 	Hotkey, RButton, Hotkey_Return, % Option
