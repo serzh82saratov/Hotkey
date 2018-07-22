@@ -341,7 +341,7 @@ Hotkey_IniWrite(ID, Section = "", FilePath = "") {
 
 Hotkey_Group(Key = "", p1 = "", p2 = "") {
 	Local Name, Value, k, v, n, m, f, r
-	Static NG := {}, GN := [], Blink := [], SaveCheck := [], i := 0
+	Static NG := {}, GN := [], SaveCheck := []
 	If (Key = "") {
 		For k, Name in SaveCheck {
 			If ((Value := Hotkey_Value(Name)) != "") {
@@ -350,11 +350,7 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 					If (n != Name && Hotkey_Equal(Value, Hotkey_Value(n))) {
 						Hotkey_Set(Name)
 						(f != "") && (r.names.Push(n), r.this := Name, r.value := Value, r.group := NG[Name])
-						If !DllCall("IsWindowVisible", "Ptr", Hotkey_ID(n))
-							Continue
-						DllCall("ShowWindowAsync", "Ptr", Hotkey_ID(n), "Int", 0)
-						Blink[Hotkey_ID(n)] := 1, i := 3
-						SetTimer, Hotkey_BlinkControl, -50
+						Hotkey_Blink(Hotkey_ID(n)) 
 					}
 				}
 			}
@@ -383,13 +379,23 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 				Break
 			}
 		NG.Delete(p1)
-	}
-	Return
+	} 
+}
 
-	Hotkey_BlinkControl:
+Hotkey_Blink(hwnd) { 
+	Local k 
+	Static i, Blink := {} 
+	If !DllCall("IsWindowVisible", "Ptr", hwnd)
+		Return
+	DllCall("ShowWindowAsync", "Ptr", hwnd, "Int", 0)
+	Blink[hwnd] := 1, i := 3
+	SetTimer, Hotkey_BlinkControl, -50
+	Return
+	
+	Hotkey_BlinkControl: 
 		For k in Blink
 			DllCall("ShowWindowAsync", "Ptr", k, "Int", Mod(i, 2) ? 4 : 0)
-		If (--i > 0) || !(Blink := [])
+		If (--i > 0) || !(Blink := {})
 			SetTimer, Hotkey_BlinkControl, -50
 		Return
 }
