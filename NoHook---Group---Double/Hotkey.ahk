@@ -2,26 +2,31 @@
 	;  E-Mail: serzh82saratov@mail.ru
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 
-Hotkey_Register(Controls*) {
-	Static IsStart
+Hotkey_Register(Controls*) { 
 	Local k, v, g, g1
 	For k, v in Controls
 	{
 		Hotkey_ID(v[2], v[1]), Hotkey_ID(v[1], v[2])
-		Hotkey_Options(v[2], v[3] = "" ? "K" : v[3])
-		Hotkey_Value(v[2], Hotkey_Value(v[1]))
+		Hotkey_Options(v[2], v[3] = "" ? "K" : v[3]) 
+		Hotkey_Value(v[2], Hotkey_Value(v[1])) 
 		PostMessage, 0x00CF, 1, , , % "ahk_id" v[2]   ;  EM_SETREADONLY
 		If RegExMatch(v[3], "i)G(\d+)", g)
 			Hotkey_Group("Set", v[1], g1)
 	}
+	Hotkey_Start() 
+}
+
+Hotkey_Start() {
+	Static IsStart
+	Local fn
 	If IsStart
-		Return Hotkey_IsRegFocus()
+		Return Hotkey_IsRegFocus() 
 	#HotkeyInterval 0
-	OnMessage(0x203, "Hotkey_WM_LBUTTONDBLCLK")  ;	WM_LBUTTONDBLCLK
+	fn := Func("Hotkey_WM_LBUTTONDBLCLK"), OnMessage(0x203, fn)  ;	WM_LBUTTONDBLCLK
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_EventFocus", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
 	If !Hotkey_Arr("ResetAlways")
 		Hotkey_InitHotkeys()
-	Hotkey_IsRegFocus(), IsStart := 1
+	Hotkey_IsRegFocus(), IsStart := 1 
 }
 
 Hotkey_Main(Param1, Param2 = "") {
@@ -46,8 +51,8 @@ Hotkey_Main(Param1, Param2 = "") {
 	If Param2
 	{
 		K := {}
-		If OnlyMods && !(OnlyMods := 0)
-			SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
+		If OnlyMods && !(OnlyMods := 0) 
+			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty")) 
 		ControlHandle := Param2
 		Hotkey_Arr("Hook", Hotkey_Options(ControlHandle))
 		PostMessage, 0x00B1, -1, -1, , ahk_id %ControlHandle%   ;  EM_SETSEL
@@ -55,8 +60,8 @@ Hotkey_Main(Param1, Param2 = "") {
 	Else If Hotkey_Arr("Hook")
 	{
 		Hotkey_Arr("Hook", 0)
-		If OnlyMods && !(OnlyMods := 0)
-			SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %ControlHandle%
+		If OnlyMods && !(OnlyMods := 0) 
+			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty")) 
 		SetTimer, Hotkey_IsRegFocus, -200
 	}
 	Return
@@ -79,10 +84,10 @@ Hotkey_ModsUp:
 		Return
 
 Hotkey_ViewMod:
-	Hotkey := "", OnlyMods := 1, Hotkey_Value(Hotkey_ID(ControlHandle), ""), Hotkey_Value(ControlHandle, "")
+	Hotkey := "", OnlyMods := 1, Hotkey_Value(ControlHandle, "")
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
-	Text := K.Mods = "" ? Hotkey_Arr("Empty") : K.Mods
-	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
+	Text := K.Mods = "" ? Hotkey_Arr("Empty") : K.Mods 
+	Hotkey_SetText(ControlHandle, Text) 
 	Return
 
 Hotkey_ViewNum:
@@ -118,10 +123,10 @@ Hotkey_Put:
 		GoTo Hotkey_Double
 	OnlyMods := 0
 	K.Prefix := K.PLCtrl K.PRCtrl K.PLAlt K.PRAlt K.PLShift K.PRShift K.PLWin K.PRWin K.PCtrl K.PAlt K.PShift K.PWin
-	Hotkey_Value(Hotkey_ID(ControlHandle), K.Prefix Hotkey), Hotkey_Value(ControlHandle, K.Prefix Hotkey)
+	Hotkey_Value(ControlHandle, K.Prefix Hotkey)
 	K.Mods := K.MLCtrl K.MRCtrl K.MLAlt K.MRAlt K.MLShift K.MRShift K.MLWin K.MRWin K.MCtrl K.MAlt K.MShift K.MWin
 	Text := K.Mods KeyName = "" ? Hotkey_Arr("Empty") : K.Mods KeyName
-	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
+	Hotkey_SetText(ControlHandle, Text) 
 
 Hotkey_GroupCheck:
 	If Hotkey_Group("Get", Hotkey_ID(ControlHandle)) && Hotkey_Group("SaveCheck", ControlHandle)
@@ -131,17 +136,16 @@ Hotkey_GroupCheck:
 Hotkey_Double:
 	If !K.Double
 	{
-		Hotkey_Value(Hotkey_ID(ControlHandle), ""), Hotkey_Value(ControlHandle, "")
-		K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1
-		Text := KeyName " & "
-		SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
+		Hotkey_Value(ControlHandle, "")
+		K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1 
+		Hotkey_SetText(ControlHandle, KeyName " & ")
 		Return
 	}
 	If (K.DHotkey = Hotkey)
 		Return
-	Hotkey_Value(Hotkey_ID(ControlHandle), K.DHotkey " & " Hotkey), Hotkey_Value(ControlHandle, K.DHotkey " & " Hotkey)
-	Text := K.DName " & " KeyName, K.Double := 0, OnlyMods := 0
-	SendMessage, 0xC, 0, &Text, , ahk_id %ControlHandle%
+	Hotkey_Value(ControlHandle, K.DHotkey " & " Hotkey)
+	Text := K.DName " & " KeyName, K.Double := 0, OnlyMods := 0 
+	Hotkey_SetText(ControlHandle, Text)
 	GoTo, Hotkey_GroupCheck
 
 Hotkey_RButton:
@@ -166,8 +170,8 @@ Hotkey_InitHotkeys(Option = 1) {
 	, vkOther := "3|13|5F|A6|A7|A8|A9|AA|AB|AC|AD|AE|AF|B0|B1|B2|B3|B4|B5|B6|B7"
 	
 	S_BatchLines := A_BatchLines
-	Option := Option ? "On" : "Off"
 	SetBatchLines, -1
+	Option := Option ? "On" : "Off"
 	#IF Hotkey_IsRegControl()
 	#IF Hotkey_Hook("K")
 	#IF Hotkey_Hook("M")
@@ -235,8 +239,8 @@ Hotkey_IsRegFocus() {
 Hotkey_WM_LBUTTONDBLCLK(wp, lp, msg, hwnd) {
 	If (Hotkey_ID(hwnd) = "")
 		Return
-	SendMessage, 0xC, 0, "" Hotkey_Arr("Empty"), , ahk_id %hwnd%
-	Hotkey_Value(hwnd, ""), Hotkey_Value(Hotkey_ID(hwnd), ""), Hotkey_Main("Clean")
+	Hotkey_SetText(hwnd, Hotkey_Arr("Empty"))
+	Hotkey_Value(hwnd, ""), Hotkey_Main("Clean")
 	Sleep 50
 	PostMessage, 0x00B1, -1, -1, , ahk_id %hwnd%   ;  EM_SETSEL
 }
@@ -268,12 +272,20 @@ Hotkey_ID(P*) {
 
 Hotkey_Value(P*) {
 	Static Arr := {}
-	Return P.MaxIndex() = 1 ? Arr[P[1]] : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : Arr.Delete(P[1])
+	Return P.MaxIndex() < 2 ? (Arr[P[1]]) : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2], Arr[Hotkey_ID(P[1])] := P[2]) : (Arr.Delete(P[1]), Arr.Delete(Hotkey_ID(P[1])))
 }
 
 Hotkey_Options(P*) {
 	Static Arr := {}
 	Return P.MaxIndex() = 1 ? Arr[P[1]] : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : Arr.Delete(P[1])
+}
+
+Hotkey_IniPath(Path = "") {
+	Return Path = "" ? Hotkey_Arr("IniPath") : Hotkey_Arr("IniPath", Path)
+}
+
+Hotkey_IniSection(Section = "") {
+	Return Section = "" ? Hotkey_Arr("IniSection") : Hotkey_Arr("IniSection", Section)
 }
 
 Hotkey_ChangeOption(ID, Option) {
@@ -286,12 +298,12 @@ Hotkey_ChangeOption(ID, Option) {
 	Return Hotkey_Options(Hwnd, Option)
 }
 
-Hotkey_Delete(ID, Destroy = 0) {
+Hotkey_Delete(ID, Destroy = 1) {
 	Local Hwnd, Name, hFocus, ControlNN
 	(ID + 0 = "") ? (Hwnd := Hotkey_ID(ID), Name := ID) : (Hwnd := ID, Name := Hotkey_ID(ID))
 	Hotkey_Group("Delete", Name)
+	Hotkey_Value(Hwnd, "", 1)
 	Hotkey_ID(Hwnd, "", 1), Hotkey_ID(Name, "", 1)
-	Hotkey_Value(Hwnd, "", 1), Hotkey_Value(Name, "", 1)
 	Hotkey_Options(Hwnd, "", 1)
 	ControlGetFocus, ControlNN, A
 	ControlGet, hFocus, Hwnd, , %ControlNN%, A
@@ -303,25 +315,21 @@ Hotkey_Delete(ID, Destroy = 0) {
 	Return Hwnd
 }
 
+Hotkey_SetText(hwnd, Text) {
+	SendMessage, 0xC, 0, &Text, , ahk_id %hwnd%
+}
+
 Hotkey_Set(Name, Value = "") {
 	Local Text
 	Text := Hotkey_HKToStr(Value)
-	SendMessage, 0xC, 0, &Text, , % "ahk_id" Hotkey_ID(Name)
-	Return Text, Hotkey_Value(Name, Value), Hotkey_Value(Hotkey_ID(Name), Value)
+	Hotkey_SetText(Hotkey_ID(Name), Text)
+	Return Text, Hotkey_Value(Name, Value)
 }
 
 Hotkey_Read(Name, Section = "", FilePath = "") {
 	Local HK
 	HK := Hotkey_IniRead(Name, Section, FilePath), Hotkey_Value(Name, HK)
 	Return Hotkey_HKToStr(HK)
-}
-
-Hotkey_IniPath(Path = "") {
-	Return Path = "" ? Hotkey_Arr("IniPath") : Hotkey_Arr("IniPath", Path)
-}
-
-Hotkey_IniSection(Section = "") {
-	Return Section = "" ? Hotkey_Arr("IniSection") : Hotkey_Arr("IniSection", Section)
 }
 
 Hotkey_IniRead(Name, Section = "", FilePath = "") {
@@ -490,9 +498,21 @@ Hotkey_HKToSend(HK, Section = "", FilePath = "") {
 	If (Section != "")
 		IniRead, HK, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section, % HK, % A_Space
 	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K))
-		Return "{" K1 " Down}{" K2 " Down}{" K1 " Up}{" K2 " Up}"
+		Return "{" (K1 := RegExReplace(K1, "S)[~\$\*]")) " Down}{" K2 " Down}{" K1 " Up}{" K2 " Up}"
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
 	While P := RegExMatch(K1, "S)([<>])*([\^\+!#])", R, P) + StrLen(R)
 		M1 .= "{" V[R1] V[R2] " Down}", M2 .= "{" V[R1] V[R2] " Up}"
 	Return M1 . "{" K2 "}" . M2
+}
+
+Hotkey_HKToSendShort(HK, Section = "", FilePath = "") { 
+	Local K, K1, K2
+	If (HK = "")
+		Return
+	If (Section != "")
+		IniRead, HK, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section, % HK, % A_Space
+	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K))
+		Return "{" RegExReplace(K1, "S)[~\$\*]") "}{" K2 "}"
+	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
+	Return RegExReplace(K1, "S)([^\^\+!#]*)") "{" K2 "}" 
 }
