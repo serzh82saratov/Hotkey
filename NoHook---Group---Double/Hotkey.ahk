@@ -1,4 +1,4 @@
-	;  Автор - serzh82saratov
+ 	;  Автор - serzh82saratov
 	;  E-Mail: serzh82saratov@mail.ru
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 
@@ -22,15 +22,16 @@ Hotkey_Start() {
 	If IsStart
 		Return Hotkey_IsRegFocus() 
 	#HotkeyInterval 0
+	  ;	#IfTimeout Timeout  ;	https://autohotkey.com/docs/commands/_IfTimeout.htm
 	fn := Func("Hotkey_WM_LBUTTONDBLCLK"), OnMessage(0x203, fn)  ;	WM_LBUTTONDBLCLK
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_EventFocus", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
 	If !Hotkey_Arr("ResetAlways")
 		Hotkey_InitHotkeys()
-	Hotkey_IsRegFocus(), IsStart := 1 
+	Hotkey_IsRegFocus(), IsStart := 1
 }
 
 Hotkey_Main(Param1, Param2 = "") {
-	Static OnlyMods, ControlHandle, Hotkey, KeyName, K := {}
+	Static OnlyMods, ControlHandle, Hotkey := " ", KeyName, K := {}
 	, Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
 				,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"
 				,"Alt":"!","Ctrl":"^","Shift":"+","Win":"#"}
