@@ -27,11 +27,11 @@ Hotkey_Start() {
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_EventFocus", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
 	If !Hotkey_Arr("ResetAlways")
 		Hotkey_InitHotkeys()
-	Hotkey_IsRegFocus(), IsStart := 1
+	Hotkey_IsRegFocus(), IsStart := 1 
 }
 
 Hotkey_Main(Param1, Param2 = "") {
-	Static OnlyMods, ControlHandle, Hotkey := " ", KeyName, K := {}
+	Static OnlyMods, ControlHandle, Hotkey, KeyName, K := {}
 	, Prefix := {"LAlt":"<!","LCtrl":"<^","LShift":"<+","LWin":"<#"
 				,"RAlt":">!","RCtrl":">^","RShift":">+","RWin":">#"
 				,"Alt":"!","Ctrl":"^","Shift":"+","Win":"#"}
@@ -80,6 +80,8 @@ Hotkey_ModsUp:
 	If InStr(Hotkey_Arr("Hook"), "S") || InStr(Hotkey_Arr("Hook"), "W")
 		Return
 	IsMod := InStr(Hotkey_Arr("Hook"), "D") ? SubStr(A_ThisHotkey, 1, -3) : SubStr(A_ThisHotkey, 2, -3)
+	If K["M" IsMod] = ""
+		Return
 	K["M" IsMod] := "", K["P" IsMod] := ""
 	If (Hotkey != "")
 		Return
