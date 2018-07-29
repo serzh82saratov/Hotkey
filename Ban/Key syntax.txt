@@ -1,0 +1,171 @@
+
+Это все хоткеи назначаемые в библиотеке.
+Самостоятельно указывать хоткеи например в Hotkey_Set или Hotkey_BanKey следует в указанном виде.
+То что после знака = не требуется, это только для расшифровки кода клавиши.
+
+nmMods
+
+LCtrl|RCtrl|LShift|RShift|LAlt|RAlt|LWin|RWin
+
+
+nmMouse
+
+MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2 
+
+
+scSymb     хоткеи по коду
+
+sc2 = 1
+sc3 = 2
+sc4 = 3
+sc5 = 4
+sc6 = 5
+sc7 = 6
+sc8 = 7
+sc9 = 8
+scA = 9
+scB = 0
+scC = -
+scD = =
+sc10 = q
+sc11 = w
+sc12 = e
+sc13 = r
+sc14 = t
+sc15 = y
+sc16 = u
+sc17 = i
+sc18 = o
+sc19 = p
+sc1A = [
+sc1B = ]
+sc1E = a
+sc1F = s
+sc20 = d
+sc21 = f
+sc22 = g
+sc23 = h
+sc24 = j
+sc25 = k
+sc26 = l
+sc27 = ;
+sc28 = '
+sc29 = `
+sc2B = \
+sc2C = z
+sc2D = x
+sc2E = c
+sc2F = v
+sc30 = b
+sc31 = n
+sc32 = m
+sc33 = ,
+sc34 = .
+sc35 = /
+sc56 = \
+
+
+scOther     хоткеи по имени
+
+Escape
+Backspace
+Tab
+Enter
+NumpadMult
+Space
+CapsLock
+F1
+F2
+F3
+F4
+F5
+F6
+F7
+F8
+F9
+F10
+ScrollLock
+NumpadSub
+NumpadAdd
+PrintScreen
+F11
+F12
+Help
+F13
+F14
+F15
+F16
+F17
+F18
+F19
+F20
+F21
+F22
+F23
+F24
+Tab
+NumpadEnter
+NumpadDiv
+Numlock
+Home
+Up
+PgUp
+Left
+Right
+End
+Down
+PgDn
+Insert
+Delete
+AppsKey
+
+
+vkNum     хоткеи по коду
+
+vk21 = NumpadPgUp
+vk22 = NumpadPgDn
+vk23 = NumpadEnd
+vk24 = NumpadHome
+vk25 = NumpadLeft
+vk26 = NumpadUp
+vk27 = NumpadRight
+vk28 = NumpadDown
+vk2D = NumpadIns
+vk2E = NumpadDel
+vk60 = Numpad0
+vk61 = Numpad1
+vk62 = Numpad2
+vk63 = Numpad3
+vk64 = Numpad4
+vk66 = Numpad6
+vk67 = Numpad7
+vk68 = Numpad8
+vk69 = Numpad9
+vk6E = NumpadDot
+vkC = NumpadClear
+vk65 = Numpad5
+
+
+vkOther     хоткеи по имени
+
+CtrlBreak
+Pause
+Sleep
+Browser_Back
+Browser_Forward
+Browser_Refresh
+Browser_Stop
+Browser_Search
+Browser_Favorites
+Browser_Home
+Volume_Mute
+Volume_Down
+Volume_Up
+Media_Next
+Media_Prev
+Media_Stop
+Media_Play_Pause
+Launch_Mail
+Launch_Media
+Launch_App1
+Launch_App2
