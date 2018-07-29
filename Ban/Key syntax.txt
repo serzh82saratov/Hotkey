@@ -10,7 +10,7 @@ LCtrl|RCtrl|LShift|RShift|LAlt|RAlt|LWin|RWin
 
 nmMouse
 
-MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2 
+LButton|RButton|MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2 
 
 
 scSymb     хоткеи по коду
