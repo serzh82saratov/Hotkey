@@ -15,7 +15,7 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % Hotkey_HKToStr(Hotkey)
 	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit), Hotkey_Value(Name, Hotkey)
 	If Write
-		Hotkey_Write(Name)
+		MsgBox % Hotkey_Write(Name)
 	RegExMatch(Option, "Si)G(\d+)", M) && Hotkey_Group("Set", Name, M1)
 	Hotkey_Options(hEdit, Option = "" ? "K" : Option)
 	Hotkey_Arr("BindString")[Name] := BindString
@@ -128,7 +128,7 @@ Hotkey_ViewNum:  ;	code
 	 If Hotkey_InHook("N")
 		KeyName := GetKeyName(ThisHotkey), Hotkey := ThisHotkey
 	Else
-		Hotkey := Format("sc{:x}", GetKeySC(A_ThisHotkey)), KeyName := GetKeyName(Hotkey)
+		Hotkey := Format("sc{:x}", GetKeySC(ThisHotkey)), KeyName := GetKeyName(Hotkey)
 	GoTo, Hotkey_Put
 
 Hotkey_ViewNumExcept:  ;	code
