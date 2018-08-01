@@ -3,15 +3,19 @@
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 
 Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString = "", ByRef hEdit = "") {
-	Local M, M1, M2, FuncObj, GuiName
+	Local M, M1, M2, FuncObj, GuiName, Write
 	If (Name + 0 != "") {
 		MsgBox, 4112, Hotkey add error, % "Name '" Name "' can not be a number, exit app."
 		ExitApp
 	}
+	If Hotkey ~= "^:" &&  StrLen(Hotkey) > 1
+		Hotkey := SubStr(Hotkey, 2), Write := 1
 	RegExMatch(ControlOption, "S)^\s*(\S+:)*(.*)$", M), GuiName := M1, ControlOption := M2
 	ControlOption := "r1 +ReadOnly +Center " Hotkey_Arr("ControlOption") " " ControlOption
 	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % Hotkey_HKToStr(Hotkey)
 	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit), Hotkey_Value(Name, Hotkey)
+	If Write
+		Hotkey_Write(Name)
 	RegExMatch(Option, "Si)G(\d+)", M) && Hotkey_Group("Set", Name, M1)
 	Hotkey_Options(hEdit, Option = "" ? "K" : Option)
 	Hotkey_Arr("BindString")[Name] := BindString
