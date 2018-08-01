@@ -8,7 +8,7 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 		MsgBox, 4112, Hotkey add error, % "Name '" Name "' can not be a number, exit app."
 		ExitApp
 	}
-	If Hotkey ~= "^:" &&  StrLen(Hotkey) > 1
+	If Hotkey ~= "^:" && StrLen(Hotkey) > 1
 		Hotkey := SubStr(Hotkey, 2), Write := 1
 	RegExMatch(ControlOption, "S)^\s*(\S+:)*(.*)$", M), GuiName := M1, ControlOption := M2
 	ControlOption := "r1 +ReadOnly +Center " Hotkey_Arr("ControlOption") " " ControlOption
