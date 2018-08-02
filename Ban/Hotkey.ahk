@@ -15,7 +15,7 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % Hotkey_HKToStr(Hotkey)
 	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit), Hotkey_Value(Name, Hotkey)
 	If Write
-		MsgBox % Hotkey_Write(Name)
+		Hotkey_Write(Name)
 	RegExMatch(Option, "Si)G(\d+)", M) && Hotkey_Group("Set", Name, M1)
 	Hotkey_Options(hEdit, Option = "" ? "K" : Option)
 	Hotkey_Arr("BindString")[Name] := BindString
@@ -215,7 +215,6 @@ Hotkey_GetName(HK, Type) {
 		Return RegExReplace(HK, "Si)(vk|sc)(.*)", "$L1$U2")
 	If Type = J
 		Return RegExReplace(HK, "Si)(Joy)", "Joy", , 1)
-	Return HK
 }
 
 Hotkey_InitHotkeys(Option = 1) {
