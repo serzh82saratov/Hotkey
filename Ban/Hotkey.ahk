@@ -39,7 +39,7 @@ Hotkey_Start() {
 }
 
 Hotkey_Main(Param1, Param2 = "") {
-	Static OnlyMods, ControlHandle, Hotkey := " ", KeyName, K := {}
+	Static OnlyMods, ControlHandle, Hotkey, KeyName, K := {}
 	, Prefix := {"LCtrl":"<^","RCtrl":">^","LShift":"<+","RShift":">+"
 				,"LAlt":"<!","RAlt":">!","LWin":"<#","RWin":">#"
 				,"Ctrl":"^","Shift":"+","Alt":"!","Win":"#"}
