@@ -142,7 +142,7 @@ vk67 = Numpad7
 vk68 = Numpad8
 vk69 = Numpad9
 vk6E = NumpadDot
-vkC = NumpadClear
+vkC и sc59 = NumpadClear, sc59 встречается на некоторых клавиатурах
 vk65 = Numpad5
 
 
