@@ -78,129 +78,129 @@ Hotkey_Main(Param1, Param2 = "") {
 	}
 	Return
 
-Hotkey_Mods:
-	ThisHotkey := Hotkey_GetName(A_ThisHotkey, "M")
-	If Hotkey_IsBan(ThisHotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	If Hotkey_InHook("S") || Hotkey_InHook("W")
-	{
-		KeyName := Hotkey := ThisHotkey
-		GoTo, Hotkey_Put
-	}
-	IsMod := Hotkey_InHook("D") ? ThisHotkey : SubStr(ThisHotkey, 2)
-	If (K["M" IsMod] != "")
-		Return
-	K["M" IsMod] := IsMod " + ", K["P" IsMod] := Prefix[IsMod]
-	GoTo, Hotkey_ViewMod
-
-Hotkey_ModsUp:
-	If Hotkey_InHook("S") || Hotkey_InHook("W")
-		Return
-	ThisHotkey := SubStr(A_ThisHotkey, 1, -3)
-	ThisHotkey := Hotkey_GetName(ThisHotkey, "M")
-	If Hotkey_InHook("Z") && Hotkey = ""
-	{
+	Hotkey_Mods:
+		ThisHotkey := Hotkey_GetName(A_ThisHotkey, "M")
 		If Hotkey_IsBan(ThisHotkey, ControlHandle)
 			Return Hotkey_Main("Clean")
-		K := {}, KeyName := Hotkey := ThisHotkey
+		If Hotkey_InHook("S") || Hotkey_InHook("W")
+		{
+			KeyName := Hotkey := ThisHotkey
+			GoTo, Hotkey_Put
+		}
+		IsMod := Hotkey_InHook("D") ? ThisHotkey : SubStr(ThisHotkey, 2)
+		If (K["M" IsMod] != "")
+			Return
+		K["M" IsMod] := IsMod " + ", K["P" IsMod] := Prefix[IsMod]
+		GoTo, Hotkey_ViewMod
+
+	Hotkey_ModsUp:
+		If Hotkey_InHook("S") || Hotkey_InHook("W")
+			Return
+		ThisHotkey := SubStr(A_ThisHotkey, 1, -3)
+		ThisHotkey := Hotkey_GetName(ThisHotkey, "M")
+		If Hotkey_InHook("Z") && Hotkey = ""
+		{
+			If Hotkey_IsBan(ThisHotkey, ControlHandle)
+				Return Hotkey_Main("Clean")
+			K := {}, KeyName := Hotkey := ThisHotkey
+			GoTo, Hotkey_Put
+		}
+		IsMod := Hotkey_InHook("D") ? ThisHotkey : SubStr(ThisHotkey, 2)
+		If K["M" IsMod] = ""  ;	Check LCtrl Up, for activate window AltGr layout language
+			Return
+		If Hotkey_IsBan(ThisHotkey, ControlHandle)
+			Return Hotkey_Main("Clean")
+		K["M" IsMod] := "", K["P" IsMod] := ""
+		If (Hotkey != "")
+			Return
+
+	Hotkey_ViewMod:
+		Hotkey := "", OnlyMods := 1
+		K.Mods := K.MLCtrl K.MRCtrl K.MLShift K.MRShift K.MLAlt K.MRAlt K.MLWin K.MRWin K.MCtrl K.MShift K.MAlt K.MWin
+		Text := K.Mods = "" ? Hotkey_Arr("Empty") : K.Mods
+		Hotkey_SetText(ControlHandle, Text, "")
+		Return
+
+	Hotkey_ViewNum:  ;	code
+		ThisHotkey := Hotkey_GetName(A_ThisHotkey, "C")
+		If Hotkey_IsBan(ThisHotkey, ControlHandle)
+			Return Hotkey_Main("Clean")
+		 If Hotkey_InHook("N")
+			KeyName := GetKeyName(ThisHotkey), Hotkey := ThisHotkey
+		Else
+			Hotkey := Format("sc{:x}", GetKeySC(ThisHotkey)), KeyName := GetKeyName(Hotkey)
 		GoTo, Hotkey_Put
-	}
-	IsMod := Hotkey_InHook("D") ? ThisHotkey : SubStr(ThisHotkey, 2)
-	If K["M" IsMod] = ""  ;	Check LCtrl Up, for activate window AltGr layout language
+
+	Hotkey_ViewNumExcept:  ;	code
+		ThisHotkey := Hotkey_GetName(A_ThisHotkey, "C")
+		If Hotkey_IsBan(ThisHotkey, ControlHandle)
+			Return Hotkey_Main("Clean")
+		If Hotkey_InHook("N")
+			GetKeyState("NumLock", "T") ? (KeyName := "Numpad5", Hotkey := "vk65") : (KeyName := "NumpadClear", Hotkey := "vkC")
+		Else
+			KeyName := "NumpadClear", Hotkey := ThisHotkey
+		GoTo, Hotkey_Put
+
+	Hotkey_ViewSC:  ;	code
+		ThisHotkey := Hotkey_GetName(A_ThisHotkey, "C")
+		If Hotkey_IsBan(ThisHotkey, ControlHandle)
+			Return Hotkey_Main("Clean")
+		KeyName := Hotkey_Arr("OnlyEngSym") ? EngSym[ThisHotkey] : Format("{:U}", GetKeyName(ThisHotkey))
+		Hotkey := ThisHotkey
+		GoTo, Hotkey_Put
+
+	Hotkey_ViewJoy:
+		If Hotkey_Main("GetMod") || Hotkey_InHook("W")
+			Return
+		ThisHotkey := Hotkey_GetName(A_ThisHotkey, "J")
+		If Hotkey_IsBan(ThisHotkey, ControlHandle)
+			Return Hotkey_Main("Clean")
+		KeyName := Hotkey := ThisHotkey
+		GoTo, Hotkey_Put
+
+	Hotkey_View:
+		ThisHotkey := Hotkey_GetName(A_ThisHotkey, "N")
+		If Hotkey_IsBan(ThisHotkey, ControlHandle)
+			Return Hotkey_Main("Clean")
+		KeyName := Hotkey := ThisHotkey
+
+	Hotkey_Put:
+		If Hotkey_InHook("W")
+			GoTo, Hotkey_Double
+		OnlyMods := 0
+		K.Prefix := K.PLCtrl K.PRCtrl K.PLShift K.PRShift K.PLAlt K.PRAlt K.PLWin K.PRWin K.PCtrl K.PShift K.PAlt K.PWin
+		K.Mods := K.MLCtrl K.MRCtrl K.MLShift K.MRShift K.MLAlt K.MRAlt K.MLWin K.MRWin K.MCtrl K.MShift K.MAlt K.MWin
+		Text := K.Mods KeyName = "" ? Hotkey_Arr("Empty") : K.Mods KeyName
+		Hotkey_SetText(ControlHandle, Text, K.Prefix Hotkey)
+
+	Hotkey_GroupCheck:
+		If Hotkey_Group("Get", Hotkey_ID(ControlHandle)) && Hotkey_Group("SaveCheck", ControlHandle)
+			SetTimer, Hotkey_Group, -70
 		Return
-	If Hotkey_IsBan(ThisHotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	K["M" IsMod] := "", K["P" IsMod] := ""
-	If (Hotkey != "")
-		Return
 
-Hotkey_ViewMod:
-	Hotkey := "", OnlyMods := 1
-	K.Mods := K.MLCtrl K.MRCtrl K.MLShift K.MRShift K.MLAlt K.MRAlt K.MLWin K.MRWin K.MCtrl K.MShift K.MAlt K.MWin
-	Text := K.Mods = "" ? Hotkey_Arr("Empty") : K.Mods
-	Hotkey_SetText(ControlHandle, Text, "")
-	Return
+	Hotkey_Double:
+		If !K.Double
+		{
+			K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1
+			Hotkey_SetText(ControlHandle, KeyName " & ", "")
+			Return
+		}
+		If (K.DHotkey = Hotkey)
+			Return
+		Text := K.DName " & " KeyName, K.Double := 0, OnlyMods := 0
+		Hotkey_SetText(ControlHandle, Text, K.DHotkey " & " Hotkey)
+		GoTo, Hotkey_GroupCheck
 
-Hotkey_ViewNum:  ;	code
-	ThisHotkey := Hotkey_GetName(A_ThisHotkey, "C")
-	If Hotkey_IsBan(ThisHotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	 If Hotkey_InHook("N")
-		KeyName := GetKeyName(ThisHotkey), Hotkey := ThisHotkey
-	Else
-		Hotkey := Format("sc{:x}", GetKeySC(ThisHotkey)), KeyName := GetKeyName(Hotkey)
-	GoTo, Hotkey_Put
-
-Hotkey_ViewNumExcept:  ;	code
-	ThisHotkey := Hotkey_GetName(A_ThisHotkey, "C")
-	If Hotkey_IsBan(ThisHotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	If Hotkey_InHook("N")
-		GetKeyState("NumLock", "T") ? (KeyName := "Numpad5", Hotkey := "vk65") : (KeyName := "NumpadClear", Hotkey := "vkC")
-	Else
-		KeyName := "NumpadClear", Hotkey := ThisHotkey
-	GoTo, Hotkey_Put
-
-Hotkey_ViewSC:  ;	code
-	ThisHotkey := Hotkey_GetName(A_ThisHotkey, "C")
-	If Hotkey_IsBan(ThisHotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	KeyName := Hotkey_Arr("OnlyEngSym") ? EngSym[ThisHotkey] : Format("{:U}", GetKeyName(ThisHotkey))
-	Hotkey := ThisHotkey
-	GoTo, Hotkey_Put
-
-Hotkey_ViewJoy:
-	If Hotkey_Main("GetMod") || Hotkey_InHook("W")
-		Return
-	ThisHotkey := Hotkey_GetName(A_ThisHotkey, "J")
-	If Hotkey_IsBan(ThisHotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	KeyName := Hotkey := ThisHotkey
-	GoTo, Hotkey_Put
-
-Hotkey_View:
-	ThisHotkey := Hotkey_GetName(A_ThisHotkey, "N")
-	If Hotkey_IsBan(ThisHotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	KeyName := Hotkey := ThisHotkey
-
-Hotkey_Put:
-	If Hotkey_InHook("W")
-		GoTo, Hotkey_Double
-	OnlyMods := 0
-	K.Prefix := K.PLCtrl K.PRCtrl K.PLShift K.PRShift K.PLAlt K.PRAlt K.PLWin K.PRWin K.PCtrl K.PShift K.PAlt K.PWin
-	K.Mods := K.MLCtrl K.MRCtrl K.MLShift K.MRShift K.MLAlt K.MRAlt K.MLWin K.MRWin K.MCtrl K.MShift K.MAlt K.MWin
-	Text := K.Mods KeyName = "" ? Hotkey_Arr("Empty") : K.Mods KeyName
-	Hotkey_SetText(ControlHandle, Text, K.Prefix Hotkey)
-
-Hotkey_GroupCheck:
-	If Hotkey_Group("Get", Hotkey_ID(ControlHandle)) && Hotkey_Group("SaveCheck", ControlHandle)
-		SetTimer, Hotkey_Group, -70
-	Return
-
-Hotkey_Double:
-	If !K.Double
-	{
-		K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1
-		Hotkey_SetText(ControlHandle, KeyName " & ", "")
-		Return
-	}
-	If (K.DHotkey = Hotkey)
-		Return
-	Text := K.DName " & " KeyName, K.Double := 0, OnlyMods := 0
-	Hotkey_SetText(ControlHandle, Text, K.DHotkey " & " Hotkey)
-	GoTo, Hotkey_GroupCheck
-
-Hotkey_RButton:
-	If Hotkey_InHook("L") && GetKeyState("LButton"`, "P")
-		KeyName := Hotkey := "LButton"
-	Else If Hotkey_InHook("R")
-		KeyName := Hotkey := "RButton"
-	Else
-		Return
-	If Hotkey_IsBan(Hotkey, ControlHandle)
-		Return Hotkey_Main("Clean")
-	GoTo, Hotkey_Put
+	Hotkey_RButton:
+		If Hotkey_InHook("L") && GetKeyState("LButton"`, "P")
+			KeyName := Hotkey := "LButton"
+		Else If Hotkey_InHook("R")
+			KeyName := Hotkey := "RButton"
+		Else
+			Return
+		If Hotkey_IsBan(Hotkey, ControlHandle)
+			Return Hotkey_Main("Clean")
+		GoTo, Hotkey_Put
 }
 
 Hotkey_GetName(HK, Type) {
@@ -387,7 +387,7 @@ Hotkey_Delete(Name, Destroy = 1) {
 	Hotkey_Value(Hwnd, "", "")  ;	Удалять, до удаления Hotkey_ID
 	Hotkey_ID(Hwnd, "", ""), Hotkey_ID(Name, "", "")
 	Hotkey_Options(Hwnd, "", "")
-	Hotkey_BanArr()[Name] := ""
+	Hotkey_BanArr().Delete(Name)
 	Hotkey_Arr("AllHotkeys").Delete(Name)
 	Hotkey_Arr("BindString").Delete(Name)
 	ControlGetFocus, ControlNN, A
