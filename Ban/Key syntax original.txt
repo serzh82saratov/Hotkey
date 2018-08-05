@@ -137,7 +137,7 @@ vkNum     хоткеи по коду
 68 = vk68 = Numpad8
 69 = vk69 = Numpad9
 6E = vk6E = NumpadDot
-C = vkC = NumpadClear
+C = vkC = NumpadClear, sc59 встречается на некоторых клавиатурах
 65 = vk65 = Numpad5
 
 
