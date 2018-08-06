@@ -10,7 +10,7 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	}
 	If Hotkey = *
 		Hotkey := Hotkey_Read(Name)
-	Else If Hotkey ~= "^:" && StrLen(Hotkey) > 1
+	Else If Hotkey ~= "^:"
 		Hotkey := SubStr(Hotkey, 2), Write := 1
 	RegExMatch(ControlOption, "S)^\s*(\S+:)*(.*)$", M), GuiName := M1, ControlOption := M2
 	ControlOption := "r1 +ReadOnly +Center " Hotkey_Arr("ControlOption") " " ControlOption
