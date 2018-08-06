@@ -375,7 +375,7 @@ Hotkey_ChangeOption(Name, Option = "") {
 		Hotkey_Group("Delete", Name)
 	If RegExMatch(Option, "Si)G(\d+)", g)
 		Hotkey_Group("Set", Name, g1)
-	Return Hotkey_Options(Hotkey_ID(Name), Option = "" ? "K" : Option)
+	Return Hotkey_Options(Hotkey_ID(Name), Option = "" ? "K" : Option), Hotkey_IsRegFocus()
 }
 
 Hotkey_Delete(Name, Destroy = 1) {
