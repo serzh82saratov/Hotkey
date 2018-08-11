@@ -16,7 +16,7 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	ControlOption := "r1 +ReadOnly +Center " Hotkey_Arr("ControlOption") " " ControlOption
 	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % Hotkey_HKToStr(Hotkey)
 	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit), Hotkey_Value(Name, Hotkey)
-	If Hotkey_Arr("KillFocus") && !Hotkey_Arr("Focus")[hGui := DllCall("GetParent", Ptr, hEdit)] {
+	If !Hotkey_Arr("Focus")[hGui := DllCall("GetParent", Ptr, hEdit)] {
 		Gui, %GuiName%Add, Text, wp hp xp yp Hidden hwndhDummy
 		Hotkey_Arr("Focus")[hGui] := hDummy
 	}
@@ -436,6 +436,10 @@ Hotkey_Write(Name, Section = "", FilePath = "") {
 Hotkey_FocusClick(wParam, lParam, msg, hwnd) {
 	If Hotkey_Arr("Focus")[hwnd]
 		ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[hwnd]
+}
+
+Hotkey_KillFocus(Name) {
+	ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[DllCall("GetParent", Ptr, Hotkey_ID(Name))]
 }
 
 	; -------------------------------------- Group --------------------------------------
