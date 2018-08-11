@@ -3,7 +3,7 @@
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 
 Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString = "", ByRef hEdit = "") {
-	Local M, M1, M2, FuncObj, GuiName, Write
+	Local M, M1, M2, FuncObj, GuiName, Write, hGui, hDummy
 	If (Name + 0 != "") {
 		MsgBox, 4112, Hotkey add error, % "Name '" Name "' can not be a number, exit app."
 		ExitApp
@@ -16,6 +16,10 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	ControlOption := "r1 +ReadOnly +Center " Hotkey_Arr("ControlOption") " " ControlOption
 	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % Hotkey_HKToStr(Hotkey)
 	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit), Hotkey_Value(Name, Hotkey)
+	If Hotkey_Arr("KillFocus") && !Hotkey_Arr("Focus")[hGui := DllCall("GetParent", Ptr, hEdit)] {
+		Gui, %GuiName%Add, Text, wp hp xp yp Hidden hwndhDummy
+		Hotkey_Arr("Focus")[hGui] := hDummy
+	}
 	If Write
 		Hotkey_Write(Name)
 	RegExMatch(Option, "Si)G(\d+)", M) && Hotkey_Group("Set", Name, M1)
@@ -29,11 +33,14 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 
 Hotkey_Start() {
 	Static IsStart
-	Local fn
+	Local fn, k, v
 	If IsStart
 		Return Hotkey_IsRegFocus()
 	#HotkeyInterval 0
 	fn := Func("Hotkey_WM_LBUTTONDBLCLK"), OnMessage(0x203, fn)  ;	WM_LBUTTONDBLCLK
+	If Hotkey_Arr("KillFocus")
+		for, k, v in {WM_LBUTTONDOWN:0x201,WM_LBUTTONUP:0x202,WM_NCLBUTTONDOWN:0xA1}
+			fn := Func("Hotkey_FocusClick"), OnMessage(v, fn)
 	Hotkey_SetWinEventHook(0x8005, 0x8005, 0, RegisterCallback("Hotkey_EventFocus", "F"), 0, 0, 0)   ;  EVENT_OBJECT_FOCUS := 0x8005
 	If !Hotkey_Arr("ResetAllways")
 		Hotkey_InitHotkeys()
@@ -98,8 +105,7 @@ Hotkey_Main(Param1, Param2 = "") {
 	Hotkey_ModsUp:
 		If Hotkey_InHook("S") || Hotkey_InHook("W")
 			Return
-		ThisHotkey := SubStr(A_ThisHotkey, 1, -3)
-		ThisHotkey := Hotkey_GetName(ThisHotkey, "M")
+		ThisHotkey := Hotkey_GetName(SubStr(A_ThisHotkey, 1, -3), "M")
 		If Hotkey_InHook("Z") && Hotkey = ""
 		{
 			If Hotkey_IsBan(ThisHotkey, ControlHandle)
@@ -317,7 +323,7 @@ Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, i
 	; -------------------------------------- Get and set --------------------------------------
 
 Hotkey_Arr(P*) {
-	Static Arr := {Empty:"Нет", AllHotkeys:{}, BindString:{}, User:{}}
+	Static Arr := {Empty:"Нет", AllHotkeys:{}, BindString:{}, Focus:{}, User:{}}
 	Return P.MaxIndex() = 1 ? Arr[P[1]] : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : !P.MaxIndex() ? Arr : Arr.Delete(P[1])
 }
 
@@ -425,6 +431,11 @@ Hotkey_Write(Name, Section = "", FilePath = "") {
 	Local HK
 	IniWrite, % HK := Hotkey_Value(Name), % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Name
 	Return HK
+}
+
+Hotkey_FocusClick(wParam, lParam, msg, hwnd) {
+	If Hotkey_Arr("Focus")[hwnd]
+		ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[hwnd]
 }
 
 	; -------------------------------------- Group --------------------------------------
