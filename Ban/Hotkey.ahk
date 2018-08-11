@@ -17,7 +17,7 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % Hotkey_HKToStr(Hotkey)
 	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit), Hotkey_Value(Name, Hotkey)
 	If !Hotkey_Arr("Focus")[hGui := DllCall("GetParent", Ptr, hEdit)] {
-		Gui, %GuiName%Add, Text, wp hp xp yp Hidden hwndhDummy
+		Gui, %GuiName%Add, Text, xp yp wp hp Hidden hwndhDummy
 		Hotkey_Arr("Focus")[hGui] := hDummy
 	}
 	If Write
@@ -433,6 +433,8 @@ Hotkey_Write(Name, Section = "", FilePath = "") {
 	Return HK
 }
 
+	; -------------------------------------- Focus --------------------------------------
+
 Hotkey_FocusClick(wParam, lParam, msg, hwnd) {
 	If Hotkey_Arr("Focus")[hwnd]
 		ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[hwnd]
@@ -440,6 +442,10 @@ Hotkey_FocusClick(wParam, lParam, msg, hwnd) {
 
 Hotkey_KillFocus(Name) {
 	ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[DllCall("GetParent", Ptr, Hotkey_ID(Name))]
+}
+
+Hotkey_SetFocus(Name) {
+	ControlFocus, , % "ahk_id" Hotkey_ID(Name)
 }
 
 	; -------------------------------------- Group --------------------------------------
