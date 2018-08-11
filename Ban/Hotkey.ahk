@@ -450,7 +450,7 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 	If (Key = "") {
 		For k, Name in SaveCheck {
 			If ((Value := Hotkey_Value(Name)) != "") {
-				(f := Hotkey_Arr("GroupEvents")) != "" && (r := {}, r.names := [])
+				(f := Hotkey_Arr("OnGroup")) != "" && (r := {}, r.names := [])
 				For m, n in GN[NG[Name]] {
 					If (n != Name && Hotkey_Equal(Value, Hotkey_Value(n))) {
 						Hotkey_Set(Name)
