@@ -438,6 +438,8 @@ Hotkey_Write(Name, Section = "", FilePath = "") {
 Hotkey_FocusClick(wParam, lParam, msg, hwnd) {
 	If Hotkey_Arr("Focus")[hwnd]
 		ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[hwnd]
+	Else
+		ControlFocus, , ahk_id %hwnd%
 }
 
 Hotkey_KillFocus(Name) {
