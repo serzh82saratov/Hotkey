@@ -6,8 +6,8 @@
 
 Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString = "", ByRef hEdit = "") {
 	Local M, M1, M2, FuncObj, GuiName, Write, hGui, hDummy
-	If (Name + 0 != "") {
-		MsgBox, 4112, Hotkey add error, % "Name '" Name "' can not be a number, exit app."
+	If (Name + 0 != "" || Hotkey_ID(Name)) {
+		MsgBox, 4112, Hotkey add error, % "Name '" Name "' can not be a number, or already exists.`nPress ok to exit app."
 		ExitApp
 	}
 	If Hotkey = *
