@@ -1,3 +1,5 @@
+
+	; -------------------------------------- Hotkey library --------------------------------------
  	;  Автор - serzh82saratov
 	;  E-Mail: serzh82saratov@mail.ru
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
@@ -46,6 +48,8 @@ Hotkey_Start() {
 		Hotkey_InitHotkeys()
 	Hotkey_IsRegFocus(), IsStart := 1
 }
+
+	; -------------------------------------- Main --------------------------------------
 
 Hotkey_Main(Param1, Param2 = "") {
 	Static OnlyMods, ControlHandle, Hotkey, KeyName, K := {}
@@ -211,20 +215,6 @@ Hotkey_Main(Param1, Param2 = "") {
 		GoTo, Hotkey_Put
 }
 
-Hotkey_GetName(HK, Type) {
-	Static ModsNames := {"LCtrl":"LCtrl","RCtrl":"RCtrl","LShift":"LShift"
-	,"RShift":"RShift","LAlt":"LAlt","RAlt":"RAlt","LWin":"LWin","RWin":"RWin"}
-	HK := RegExReplace(HK, "S)[~\*\$]")
-	If Type = N
-		Return GetKeyName(HK)
-	If Type = M
-		Return ModsNames[HK]
-	If Type = C
-		Return RegExReplace(HK, "Si)(vk|sc)(.*)", "$L1$U2")
-	If Type = J
-		Return RegExReplace(HK, "Si)(Joy)", "Joy", , 1)
-}
-
 Hotkey_InitHotkeys(Option = 1) {
 	Local S_FormatInteger, S_BatchLines
 	Static nmMods := "LCtrl|RCtrl|LShift|RShift|LAlt|RAlt|LWin|RWin"
@@ -342,25 +332,6 @@ Hotkey_Options(P*) {
 	Return P.MaxIndex() = 1 ? Arr[P[1]] : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : !P.MaxIndex() ? Arr : Arr.Delete(P[1])
 }
 
-Hotkey_BanKey(Keys, Name = 0) {
-	Hotkey_BanArr()[Name] := {}
-	Loop, Parse, Keys, |
-		Hotkey_BanArr()[Name][A_LoopField] := 1
-}
-
-Hotkey_BanArr(P*) {
-	Static Arr := {}
-	Return Arr
-}
-
-Hotkey_IsBan(HK, hwnd) {
-	If Hotkey_BanArr().0.HasKey(HK)  ;	Global ban
-		Return 1
-	If Hotkey_BanArr()[Hotkey_ID(hwnd)].HasKey(HK)
-		Return 1
-	Return 0
-}
-
 Hotkey_IniPath(Path = "") {
 	Return Path = "" ? Hotkey_Arr("IniPath") : Hotkey_Arr("IniPath", Path)
 }
@@ -431,6 +402,27 @@ Hotkey_Write(Name, Section = "", FilePath = "") {
 	Local HK
 	IniWrite, % HK := Hotkey_Value(Name), % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section = "" ? Hotkey_IniSection() : Section, % Name
 	Return HK
+}
+
+	; -------------------------------------- BanKey --------------------------------------
+
+Hotkey_BanKey(Keys, Name = 0) {
+	Hotkey_BanArr()[Name] := {}
+	Loop, Parse, Keys, |
+		Hotkey_BanArr()[Name][A_LoopField] := 1
+}
+
+Hotkey_BanArr(P*) {
+	Static Arr := {}
+	Return Arr
+}
+
+Hotkey_IsBan(HK, hwnd) {
+	If Hotkey_BanArr().0.HasKey(HK)  ;	Global ban
+		Return 1
+	If Hotkey_BanArr()[Hotkey_ID(hwnd)].HasKey(HK)
+		Return 1
+	Return 0
 }
 
 	; -------------------------------------- Focus --------------------------------------
@@ -555,6 +547,20 @@ Hotkey_ModsSub(HK) {
 
 	; -------------------------------------- Format --------------------------------------
 
+Hotkey_GetName(HK, Type) {
+	Static ModsNames := {"LCtrl":"LCtrl","RCtrl":"RCtrl","LShift":"LShift"
+	,"RShift":"RShift","LAlt":"LAlt","RAlt":"RAlt","LWin":"LWin","RWin":"RWin"}
+	HK := RegExReplace(HK, "S)[~\*\$]")
+	If Type = N
+		Return GetKeyName(HK)
+	If Type = M
+		Return ModsNames[HK]
+	If Type = C
+		Return RegExReplace(HK, "Si)(vk|sc)(.*)", "$L1$U2")
+	If Type = J
+		Return RegExReplace(HK, "Si)(Joy)", "Joy", , 1)
+}
+
 Hotkey_HKToStr(HK) {
 	Static Prefix := {"^":"Ctrl","+":"Shift","!":"Alt","#":"Win","<":"L",">":"R"}
 	, EngSym := {"sc2":"1","sc3":"2","sc4":"3","sc5":"4","sc6":"5","sc7":"6"
@@ -599,8 +605,8 @@ Hotkey_HKToSend(HK, Count = "") {
 	Local K, K1, K2, R, Res
 	If (HK = "")
 		Return
-	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K)) {	
-		R := "{" RegExReplace(K1, "S)[~\$\*]") "}{" K2 "}" 
+	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K)) {
+		R := "{" RegExReplace(K1, "S)[~\$\*]") "}{" K2 "}"
 		If (Count != "")
 			Loop % Count
 				Res .= R
@@ -615,7 +621,7 @@ Hotkey_HKToSendEx(HK, Count = "") {
 	Local K, K1, K2, M1, M2, R, R1, R2, P := 1, R, Res
 	If (HK = "")
 		Return
-	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K)) {	
+	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K)) {
 		R := "{" (K1 := RegExReplace(K1, "S)[~\$\*]")) " Down}{" K2 " Down}{" K1 " Up}{" K2 " Up}"
 		If (Count != "")
 			Loop % Count
@@ -627,3 +633,5 @@ Hotkey_HKToSendEx(HK, Count = "") {
 		M1 .= "{" V[R1] V[R2] " Down}", M2 .= "{" V[R1] V[R2] " Up}"
 	Return M1 . "{" K2 (Count = "" ? "" : " " Count) "}" . M2
 }
+
+	; --------------------------------------		--------------------------------------
