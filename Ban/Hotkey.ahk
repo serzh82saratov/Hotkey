@@ -595,29 +595,35 @@ Hotkey_HKToStr(HK) {
 	Return M . (StrLen(K2) = 1 ? Format("{:U}", K2) : K2)
 }
 
-Hotkey_HKToSend(HK, Section = "", FilePath = "") {
-	Local K, K1, K2
+Hotkey_HKToSend(HK, Count = "") {
+	Local K, K1, K2, R, Res
 	If (HK = "")
 		Return
-	If (Section != "")
-		IniRead, HK, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section, % HK, % A_Space
-	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K))
-		Return "{" RegExReplace(K1, "S)[~\$\*]") "}{" K2 "}"
+	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K)) {	
+		R := "{" RegExReplace(K1, "S)[~\$\*]") "}{" K2 "}" 
+		If (Count != "")
+			Loop % Count
+				Res .= R
+		Return (Count != "") ? Res : R
+	}
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
-	Return RegExReplace(K1, "S)([^\^\+!#]*)") "{" K2 "}"
+	Return RegExReplace(K1, "S)([^\^\+!#]*)") "{" K2 (Count = "" ? "" : " " Count) "}"
 }
 
-Hotkey_HKToSendEx(HK, Section = "", FilePath = "") {
+Hotkey_HKToSendEx(HK, Count = "") {
 	Static V := {"^":"Ctrl","+":"Shift","!":"Alt","#":"Win","<":"L",">":"R","":"L"}
-	Local K, K1, K2, M1, M2, R, R1, R2, P := 1
+	Local K, K1, K2, M1, M2, R, R1, R2, P := 1, R, Res
 	If (HK = "")
 		Return
-	If (Section != "")
-		IniRead, HK, % FilePath = "" ? Hotkey_IniPath() : FilePath, % Section, % HK, % A_Space
-	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K))
-		Return "{" (K1 := RegExReplace(K1, "S)[~\$\*]")) " Down}{" K2 " Down}{" K1 " Up}{" K2 " Up}"
+	If InStr(HK, " & ") && (1, RegExMatch(HK, "S)^\s*(.*?) & (.*?)\s*$", K)) {	
+		R := "{" (K1 := RegExReplace(K1, "S)[~\$\*]")) " Down}{" K2 " Down}{" K1 " Up}{" K2 " Up}"
+		If (Count != "")
+			Loop % Count
+				Res .= R
+		Return (Count != "") ? Res : R
+	}
 	RegExMatch(HK, "S)^\s*([~\*\$\^\+!#<>]*)\{?(.*?)}?\s*$", K)
 	While P := RegExMatch(K1, "S)([<>])*([\^\+!#])", R, P) + StrLen(R)
 		M1 .= "{" V[R1] V[R2] " Down}", M2 .= "{" V[R1] V[R2] " Up}"
-	Return M1 . "{" K2 "}" . M2
+	Return M1 . "{" K2 (Count = "" ? "" : " " Count) "}" . M2
 }
