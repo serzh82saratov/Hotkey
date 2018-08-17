@@ -1,8 +1,9 @@
 
 	; -------------------------------------- Hotkey library --------------------------------------
  	;  Автор - serzh82saratov
-	;  E-Mail: serzh82saratov@mail.ru
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
+	;  E-Mail: serzh82saratov@mail.ru
+	;  About - https://autohotkey.com/boards/viewtopic.php?f=6&t=53853
 
 Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString = "", ByRef hEdit = "") {
 	Local M, M1, M2, FuncObj, GuiName, Write, hGui, hDummy
@@ -425,7 +426,7 @@ Hotkey_IsBan(HK, hwnd) {
 	Return 0
 }
 
-	; -------------------------------------- Focus --------------------------------------
+	; -------------------------------------- Control --------------------------------------
 
 Hotkey_FocusClick(wParam, lParam, msg, hwnd) {
 	If Hotkey_Arr("Focus")[hwnd]
@@ -440,6 +441,18 @@ Hotkey_KillFocus(Name) {
 
 Hotkey_SetFocus(Name) {
 	ControlFocus, , % "ahk_id" Hotkey_ID(Name)
+}
+
+Hotkey_Move(Name, Option) {
+	GuiControl, Move, % Hotkey_ID(Name), % Option
+}
+
+Hotkey_Disable(Name, Disable = 1) {
+	GuiControl, % Disable ? "Disable" : "Enable", % Hotkey_ID(Name)
+}
+
+Hotkey_Hide(Name, Hide = 1) {
+	GuiControl, % Hide ? "Hide" : "Show", % Hotkey_ID(Name)
 }
 
 	; -------------------------------------- Group --------------------------------------
