@@ -1,5 +1,6 @@
 
 	; -------------------------------------- Hotkey library --------------------------------------
+ 	;  Version 2.01
  	;  Автор - serzh82saratov
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	;  E-Mail: serzh82saratov@mail.ru
