@@ -1,6 +1,6 @@
 
 	; -------------------------------------- Hotkey library --------------------------------------
- 	;  Version 2.01
+ 	;  Version 2.02
  	;  Автор - serzh82saratov
 	;  Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	;  E-Mail: serzh82saratov@mail.ru
@@ -436,8 +436,18 @@ Hotkey_FocusClick(wParam, lParam, msg, hwnd) {
 		ControlFocus, , ahk_id %hwnd%
 }
 
-Hotkey_KillFocus(Name) {
-	ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[DllCall("GetParent", Ptr, Hotkey_ID(Name))]
+Hotkey_KillFocus(Name = "") {
+	Local ControlNN, hFocus
+	If (Name = "")
+	{
+		ControlGetFocus, ControlNN, A
+		ControlGet, hFocus, Hwnd, , %ControlNN%, A
+		If Hotkey_ID(hFocus) = ""
+			Return
+		ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[DllCall("GetParent", Ptr, hFocus)]
+	}
+	Else
+		ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[DllCall("GetParent", Ptr, Hotkey_ID(Name))]
 }
 
 Hotkey_SetFocus(Name) {
