@@ -20,7 +20,7 @@ nmMouse
 LButton|RButton|MButton|WheelDown|WheelUp|WheelRight|WheelLeft|XButton1|XButton2 
 
 
-scSymb     хоткеи по коду
+scSymb     хоткеи по скан коду
 
 sc2 = 1
 sc3 = 2
@@ -127,7 +127,7 @@ Delete
 AppsKey
 
 
-vkNum     хоткеи по коду
+vkNum     хоткеи по виртуальному коду
 
 vk21 = NumpadPgUp
 vk22 = NumpadPgDn
