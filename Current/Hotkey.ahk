@@ -1,13 +1,14 @@
 
 /*
-	Version 2.03
-	20:08 02.02.2020
+	Version 2.04
+	01:03 03.02.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
 	About - https://autohotkey.com/boards/viewtopic.php?f=6&t=53853
 
-	+2.03
+	
+	+2.03	20:08 02.02.2020
 		Hotkey_Add > Func - Вызов функции теперь по таймеру, а не как +g привязанный к контролу
 */
 
@@ -170,7 +171,7 @@ Hotkey_Main(Param1, Param2 = "") {
 		GoTo, Hotkey_Put
 
 	Hotkey_ViewJoy:
-		If Hotkey_Main("GetMod") || Hotkey_InHook("W")
+		If Hotkey_Main("GetMod")
 			Return
 		ThisHotkey := Hotkey_GetName(A_ThisHotkey, "J")
 		If Hotkey_IsBan(ThisHotkey, ControlHandle)
@@ -201,6 +202,8 @@ Hotkey_Main(Param1, Param2 = "") {
 	Hotkey_Double:
 		If !K.Double
 		{
+			If Hotkey ~= "^Wheel" || Hotkey ~= "\d+Joy\d+"
+				Return
 			K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1
 			Hotkey_SetText(ControlHandle, KeyName " & ", "")
 			Return
