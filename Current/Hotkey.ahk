@@ -1,14 +1,14 @@
 
 /*
-	Version 2.04
-	01:03 03.02.2020
+	v2.04        01:03 03.02.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
 	About - https://autohotkey.com/boards/viewtopic.php?f=6&t=53853
 
-	
-	+2.03	20:08 02.02.2020
+	+2.04
+		Первой в паре не может быть колёсико мыши и джойстик.
+	+2.03
 		Hotkey_Add > Func - Вызов функции теперь по таймеру, а не как +g привязанный к контролу
 */
 
