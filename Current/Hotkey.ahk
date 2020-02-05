@@ -2,12 +2,14 @@
 	; _________________________________________________ Hotkey library _________________________________________________
 	
 /*
-	v2.04        01:03 03.02.2020
+	v2.05        00:52 06.02.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
 	About - https://autohotkey.com/boards/viewtopic.php?f=6&t=53853
 
+	+2.05
+		Hotkey_Options - сохранение по имени а не по хэндлу
 	+2.04
 		Hotkey_Add > Option > "W" - Первой в паре не может быть колёсико мыши и джойстик.
 	+2.03
@@ -36,7 +38,7 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	If Write
 		Hotkey_Write(Name)
 	RegExMatch(Option, "Si)G(\d+)", M) && Hotkey_Group("Set", Name, M1)
-	Hotkey_Options(hEdit, Option = "" ? "K" : Option)
+	Hotkey_Options(Name, Option = "" ? "K" : Option)
 	Hotkey_Arr("BindString")[Name] := BindString
 	Hotkey_Arr("AllHotkeys")[Name] := hEdit
 	Hotkey_Arr("Function")[hEdit] := Func(Func).Bind(Name, hEdit)
@@ -89,7 +91,7 @@ Hotkey_Main(Param1, Param2 = "") {
 		If OnlyMods && !(OnlyMods := 0)
 			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "")
 		ControlHandle := Param2
-		Hotkey_Arr("Hook", Hotkey_Options(ControlHandle))
+		Hotkey_Arr("Hook", Hotkey_Options(Hotkey_ID(ControlHandle)))
 		PostMessage, 0x00B1, -2, -2, , ahk_id %ControlHandle%   ;	EM_SETSEL
 	}
 	Else If Hotkey_Arr("Hook")
@@ -368,7 +370,7 @@ Hotkey_ChangeOption(Name, Option = "") {
 		Hotkey_Group("Delete", Name)
 	If RegExMatch(Option, "Si)G(\d+)", g)
 		Hotkey_Group("Set", Name, g1)
-	Return Hotkey_Options(Hotkey_ID(Name), Option = "" ? "K" : Option), Hotkey_IsRegFocus()
+	Return Hotkey_Options(Name, Option = "" ? "K" : Option), Hotkey_IsRegFocus()
 }
 
 Hotkey_Delete(Name, Destroy = 1) {
@@ -379,7 +381,7 @@ Hotkey_Delete(Name, Destroy = 1) {
 		Hotkey_Group("Delete", Name)
 	Hotkey_Value(Hwnd, "", "")  ;	Удалять, до удаления Hotkey_ID
 	Hotkey_ID(Hwnd, "", ""), Hotkey_ID(Name, "", "")
-	Hotkey_Options(Hwnd, "", "")
+	Hotkey_Options(Name, "", "")
 	Hotkey_Arr("Function").Delete(Hwnd)
 	Hotkey_BanArr().Delete(Name)
 	Hotkey_Arr("AllHotkeys").Delete(Name)
@@ -583,6 +585,7 @@ Hotkey_ModsSub(HK) {
 	HK := StrReplace(HK, "++", "+", , 1)
 	HK := StrReplace(HK, "!!", "!", , 1)
 	Return StrReplace(HK, "##", "#", , 1)
+	;  RegExReplace(HK, "(#)+|(\^)+|(\+)+|(\!)+", "$1$2$3$4")
 }
 
 	; _________________________________________________ Format _________________________________________________
@@ -675,3 +678,4 @@ Hotkey_HKToSendEx(HK, Count = "") {
 }
 
 	; _________________________________________________ End library _________________________________________________
+
