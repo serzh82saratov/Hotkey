@@ -1,13 +1,17 @@
 
+
 	; _________________________________________________ Hotkey library _________________________________________________
-	
+
 /*
-	v2.05        00:52 06.02.2020
+	v2.06        00:25 11.02.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
 	About - https://autohotkey.com/boards/viewtopic.php?f=6&t=53853
 
+	+2.06
+		+ Hotkey_ValueText
+		+ Hotkey_Call
 	+2.05
 		Hotkey_Options - сохранение по имени а не по хэндлу
 	+2.04
@@ -18,9 +22,9 @@
 
 
 Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString = "", ByRef hEdit = "") {
-	Local M, M1, M2, GuiName, Write, hGui, hDummy
-	If (Name + 0 != "" || Hotkey_ID(Name)) {
-		MsgBox, 4112, Hotkey add error, % "Name '" Name "' can not be a number, or already exists.`nPress ok to exit app."
+	Local M, M1, M2, GuiName, Write, hGui, hDummy, HKToStr
+	If (Name + 0 != "" || Hotkey_ID(Name)) { 
+		Throw Exception("Hotkey add error`nName '" Name "' can not be a number, or already exists.", -1) 
 		ExitApp
 	}
 	If Hotkey = *
@@ -29,8 +33,9 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 		Hotkey := SubStr(Hotkey, 2), Write := 1
 	RegExMatch(ControlOption, "S)^\s*(\S+:)*(.*)$", M), GuiName := M1, ControlOption := M2
 	ControlOption := "r1 +ReadOnly +Center " Hotkey_Arr("ControlOption") " " ControlOption
-	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % Hotkey_HKToStr(Hotkey)
-	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit), Hotkey_Value(Name, Hotkey)
+	Gui, %GuiName%Add, Edit, %ControlOption% hwndhEdit, % HKToStr := Hotkey_HKToStr(Hotkey)
+	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit)
+	Hotkey_Value(Name, Hotkey), Hotkey_ValueText(Name, HKToStr)
 	If !Hotkey_Arr("Focus")[hGui := DllCall("GetParent", Ptr, hEdit)] {
 		Gui, %GuiName%Add, Text, xp yp wp hp Hidden hwndhDummy
 		Hotkey_Arr("Focus")[hGui] := hDummy
@@ -63,7 +68,7 @@ Hotkey_Start() {
 
 	; _________________________________________________ Main _________________________________________________
 
-Hotkey_Main(Param1, Param2 = "") {
+Hotkey_Main(Param1 = "", Param2 = "") {
 	Static OnlyMods, ControlHandle, Hotkey, KeyName, K := {}
 	, Prefix := {"LCtrl":"<^","RCtrl":">^","LShift":"<+","RShift":">+"
 				,"LAlt":"<!","RAlt":">!","LWin":"<#","RWin":">#"
@@ -82,23 +87,23 @@ Hotkey_Main(Param1, Param2 = "") {
 	If Param1 = Clean
 	{
 		ControlHandle := !Param2 ? ControlHandle : Param2
-		Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "")
-		Return K := {}, OnlyMods := 0, Hotkey := KeyName := ""
+		Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "", 1)
+		Return Hotkey_Arr("Empty"), K := {}, OnlyMods := 0, Hotkey := KeyName := ""
 	}
-	If Param2
+	If Param1 + 0
 	{
 		K := {}
 		If OnlyMods && !(OnlyMods := 0)
-			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "")
-		ControlHandle := Param2
+			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "", 1)
+		ControlHandle := Param1
 		Hotkey_Arr("Hook", Hotkey_Options(Hotkey_ID(ControlHandle)))
 		PostMessage, 0x00B1, -2, -2, , ahk_id %ControlHandle%   ;	EM_SETSEL
 	}
 	Else If Hotkey_Arr("Hook")
-	{
+	{ 
 		Hotkey_Arr("Hook", "")
 		If OnlyMods && !(OnlyMods := 0)
-			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "")
+			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "", 1)
 		SetTimer, Hotkey_IsRegFocus, -200
 	}
 	Return
@@ -142,7 +147,7 @@ Hotkey_Main(Param1, Param2 = "") {
 		Hotkey := "", OnlyMods := 1
 		K.Mods := K.MLCtrl K.MRCtrl K.MLShift K.MRShift K.MLAlt K.MRAlt K.MLWin K.MRWin K.MCtrl K.MShift K.MAlt K.MWin
 		Text := K.Mods = "" ? Hotkey_Arr("Empty") : K.Mods
-		Hotkey_SetText(ControlHandle, Text, "")
+		Hotkey_SetText(ControlHandle, Text, "", 1)
 		Return
 
 	Hotkey_ViewNum:  ;	code
@@ -198,8 +203,13 @@ Hotkey_Main(Param1, Param2 = "") {
 		Hotkey_SetText(ControlHandle, Text, K.Prefix Hotkey)
 
 	Hotkey_GroupCheck:
-		If Hotkey_Group("Get", Hotkey_ID(ControlHandle)) && Hotkey_Group("SaveCheck", ControlHandle)
-			SetTimer, Hotkey_Group, -70
+		If Hotkey_Group("Get", Hotkey_ID(ControlHandle))
+		{
+			Hotkey_Group("SaveCheck", ControlHandle)
+			SetTimer, Hotkey_Group, -50
+		}
+		Else
+			Hotkey_Call(hwnd)
 		Return
 
 	Hotkey_Double:
@@ -208,7 +218,7 @@ Hotkey_Main(Param1, Param2 = "") {
 			If Hotkey ~= "^Wheel" || Hotkey ~= "\d+Joy\d+"
 				Return
 			K.DHotkey := Hotkey, K.DName := KeyName, K.Double := 1, OnlyMods := 1
-			Hotkey_SetText(ControlHandle, KeyName " & ", "")
+			Hotkey_SetText(ControlHandle, KeyName " & ", "", 1)
 			Return
 		}
 		If (K.DHotkey = Hotkey)
@@ -306,19 +316,17 @@ Hotkey_IsRegFocus() {
 	Local ControlNN, hFocus
 	ControlGetFocus, ControlNN, A
 	ControlGet, hFocus, Hwnd, , %ControlNN%, A
-	Hotkey_ID(hFocus) != "" ? Hotkey_Main("Control", hFocus) : 0
+	Hotkey_ID(hFocus) != "" ? Hotkey_Main(hFocus) : 0
 }
 
 Hotkey_WM_LBUTTONDBLCLK(wp, lp, msg, hwnd) {
 	If (Hotkey_ID(hwnd) = "")
 		Return
 	Hotkey_Main("Clean", hwnd)
-	Sleep 50
-	PostMessage, 0x00B1, -2, -2, , ahk_id %hwnd%   ;	EM_SETSEL
 }
 
 Hotkey_EventFocus(hWinEventHook, event, hwnd) {
-	Hotkey_ID(hwnd) != "" ? Hotkey_Main("Control", hwnd) : Hotkey_Main("Control")
+	Hotkey_ID(hwnd) != "" ? Hotkey_Main(hwnd) : Hotkey_Main()
 }
 
 Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, idProcess, idThread, dwFlags) {
@@ -330,22 +338,27 @@ Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, i
 
 Hotkey_Arr(P*) {
 	Static Arr := {Empty:"Нет", AllHotkeys:{}, BindString:{}, Focus:{}, User:{}, Function:{}}
-	Return P.MaxIndex() = 1 ? Arr[P[1]] : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : !P.MaxIndex() ? Arr : Arr.Delete(P[1])
+	Return P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : P.MaxIndex() = 1 ? Arr[P[1]] : Arr
 }
 
 Hotkey_ID(P*) {
 	Static Arr := {}
-	Return P.MaxIndex() = 1 ? Arr[P[1]] : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : !P.MaxIndex() ? Arr : Arr.Delete(P[1])
+	Return P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : P.MaxIndex() = 1 ? Arr[P[1]] : Arr
 }
 
 Hotkey_Value(P*) {
 	Static Arr := {}
-	Return P.MaxIndex() = 2 ? (Arr[P[1]] := P[2], Arr[Hotkey_ID(P[1])] := P[2]) : P.MaxIndex() = 1 ? Arr[P[1]] : !P.MaxIndex() ? Arr : (Arr.Delete(P[1]), Arr.Delete(Hotkey_ID(P[1])))
+	Return P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : P.MaxIndex() = 1 ? Arr[P[1]] : Arr
+}
+
+Hotkey_ValueText(P*) {
+	Static Arr := {}
+	Return P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : P.MaxIndex() = 1 ? Arr[P[1]] : Arr
 }
 
 Hotkey_Options(P*) {
 	Static Arr := {}
-	Return P.MaxIndex() = 1 ? Arr[P[1]] : P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : !P.MaxIndex() ? Arr : Arr.Delete(P[1])
+	Return P.MaxIndex() = 2 ? (Arr[P[1]] := P[2]) : P.MaxIndex() = 1 ? Arr[P[1]] : Arr
 }
 
 Hotkey_IniPath(Path = "") {
@@ -379,16 +392,18 @@ Hotkey_Delete(Name, Destroy = 1) {
 	GuiControl, -g, % Hwnd
 	If Hotkey_Group("Get", Name)
 		Hotkey_Group("Delete", Name)
-	Hotkey_Value(Hwnd, "", "")  ;	Удалять, до удаления Hotkey_ID
-	Hotkey_ID(Hwnd, "", ""), Hotkey_ID(Name, "", "")
-	Hotkey_Options(Name, "", "")
+	Hotkey_Value().Delete(Name)  ;	Удалять, до удаления Hotkey_ID
+	Hotkey_ValueText().Delete(Name)
+	Hotkey_ID().Delete(Hwnd)
+	Hotkey_ID().Delete(Name)
+	Hotkey_Options().Delete(Name)
 	Hotkey_Arr("Function").Delete(Hwnd)
 	Hotkey_BanArr().Delete(Name)
 	Hotkey_Arr("AllHotkeys").Delete(Name)
 	Hotkey_Arr("BindString").Delete(Name)
 	ControlGetFocus, ControlNN, A
 	ControlGet, hFocus, Hwnd, , %ControlNN%, A
-	(hFocus = Hwnd ? Hotkey_Main("Control") : 0)
+	(hFocus = Hwnd ? Hotkey_Main() : 0)
 	If Destroy
 		DllCall("DestroyWindow", "Ptr", Hwnd)
 	Else
@@ -396,20 +411,26 @@ Hotkey_Delete(Name, Destroy = 1) {
 	Return Hwnd
 }
 
-Hotkey_SetText(hwnd, Text, HK) {
-	Local funcobj
-	Hotkey_Value(hwnd, HK)
+Hotkey_SetText(hwnd, Text, HK, Call = 0) {
+	Hotkey_Value(Hotkey_ID(hwnd), HK)
+	Hotkey_ValueText(Hotkey_ID(hwnd), Text)
 	SendMessage, 0x000C, 0, &Text, , ahk_id %hwnd%		;	WM_SETTEXT
-	PostMessage, 0x00B1, -2, -2, , ahk_id %hwnd%		;	EM_SETSEL
-	funcobj := Hotkey_Arr("Function")[hwnd]
-	Try SetTimer, % funcobj, -20
+	PostMessage, 0x00B1, -2, -2, , ahk_id %hwnd%		;	EM_SETSEL 
+	If Call
+		Hotkey_Call(hwnd)
 }
 
 Hotkey_Set(Name, HK = "") {
 	Local Text
 	Text := Hotkey_HKToStr(HK)
-	Hotkey_SetText(Hotkey_ID(Name), Text, HK)
+	Hotkey_SetText(Hotkey_ID(Name), Text, HK, 1)
 	Return Text
+}
+
+Hotkey_Call(hwnd, to = 20) {
+	Local funcobj
+	funcobj := Hotkey_Arr("Function")[hwnd]
+	Try SetTimer, % funcobj, -%to% 
 }
 
 Hotkey_Read(Name, Section = "", FilePath = "") {
@@ -490,7 +511,7 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 	Local Name, Value, k, v, n, m, f, r
 	Static NG := {}, GN := [], SaveCheck := []
 	If (Key = "") {
-		For k, Name in SaveCheck {
+		For k, Name in SaveCheck { 
 			If ((Value := Hotkey_Value(Name)) != "") {
 				(f := Hotkey_Arr("OnGroup")) != "" && (r := {}, r.names := [])
 				For m, n in GN[NG[Name]] {
@@ -503,13 +524,16 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 			}
 			SaveCheck.Delete(k)
 		}
-		(f != "") && (r.this != "") && %f%(r)
+		If (r.this != "")
+			(f != "") && %f%(r)
+		Else 
+			Hotkey_Call(Hotkey_ID(Name))
 	}
-	Else If (Key = "Set")
+	Else If (Key = "Set")   ;  p1 = имя, p2 = номер группы
 		NG[p1] := p2, IsObject(GN[p2]) ? GN[p2].Push(p1) : GN[p2] := [p1]
-	Else If (Key = "SaveCheck")
+	Else If (Key = "SaveCheck")   ;  p1 = ControlHandle
 		Return 1, SaveCheck[p1] := Hotkey_ID(p1)
-	Else If (Key = "Get")
+	Else If (Key = "Get")   ;  p1 = ControlHandle
 		Return NG[p1]
 	Else If (Key = "CheckAll") {
 		For k, v in GN
@@ -519,7 +543,7 @@ Hotkey_Group(Key = "", p1 = "", p2 = "") {
 						If (n != m && Hotkey_Equal(Value, Hotkey_Value(m)))
 							Hotkey_Set(m)
 	}
-	Else If (Key = "Delete") {
+	Else If (Key = "Delete") {   ;  p1 = имя
 		For k, v in GN[NG[p1]]
 			If (v = p1) {
 				GN[NG[p1]].RemoveAt(k)
