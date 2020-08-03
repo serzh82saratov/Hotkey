@@ -1,14 +1,15 @@
 
-
 	; _________________________________________________ Hotkey library _________________________________________________
 
 /*
-	v2.06        00:25 11.02.2020
+	v2.07        00:25 11.02.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
 	About - https://autohotkey.com/boards/viewtopic.php?f=6&t=53853
 
+	+2.07
+		bug fix
 	+2.06
 		+ Hotkey_ValueText
 		+ Hotkey_Call
@@ -209,7 +210,7 @@ Hotkey_Main(Param1 = "", Param2 = "") {
 			SetTimer, Hotkey_Group, -50
 		}
 		Else
-			Hotkey_Call(hwnd)
+			Hotkey_Call(ControlHandle)
 		Return
 
 	Hotkey_Double:
@@ -702,4 +703,3 @@ Hotkey_HKToSendEx(HK, Count = "") {
 }
 
 	; _________________________________________________ End library _________________________________________________
-
