@@ -2,7 +2,7 @@
 	; _________________________________________________ Hotkey library _________________________________________________
 
 /*
-	v2.07        00:25 11.02.2020
+	v2.07        17:04 03.08.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
