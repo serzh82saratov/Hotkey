@@ -10,6 +10,7 @@
 
 	+2.08
 		Hotkey_KillFocus fix for tab control
+		OnFocus - Hotkey_Arr("OnFocus", Func("OnFocusFunc")) 
 	+2.07
 		bug fix
 	+2.06
@@ -97,6 +98,7 @@ Hotkey_Main(Param1 = "", Param2 = "") {
 	If Param1 = Clean
 	{
 		ControlHandle := !Param2 ? ControlHandle : Param2
+		Hotkey_Arr("HookHandle", ControlHandle)
 		Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "", 1)
 		Return Hotkey_Arr("Empty"), K := {}, OnlyMods := 0, Hotkey := KeyName := ""
 	}
@@ -105,7 +107,8 @@ Hotkey_Main(Param1 = "", Param2 = "") {
 		K := {}
 		If OnlyMods && !(OnlyMods := 0)
 			Hotkey_SetText(ControlHandle, Hotkey_Arr("Empty"), "", 1)
-		ControlHandle := Param1
+		ControlHandle := Param1 
+		Hotkey_Arr("HookHandle", ControlHandle)
 		Hotkey_Arr("Hook", Hotkey_Options(Hotkey_ID(ControlHandle)))
 		PostMessage, 0x00B1, -2, -2, , ahk_id %ControlHandle%   ;	EM_SETSEL
 	}
@@ -335,8 +338,11 @@ Hotkey_WM_LBUTTONDBLCLK(wp, lp, msg, hwnd) {
 	Hotkey_Main("Clean", hwnd)
 }
 
-Hotkey_EventFocus(hWinEventHook, event, hwnd) {
-	Hotkey_ID(hwnd) != "" ? Hotkey_Main(hwnd) : Hotkey_Main()
+Hotkey_EventFocus(hWinEventHook, event, hwnd) { 
+	If Hotkey_ID(hwnd) != ""
+		Hotkey_Main(hwnd), Hotkey_Arr("OnFocus") && Hotkey_Arr("OnFocus").Call(Hotkey_ID(hwnd))
+	Else 
+		Hotkey_Main()
 }
 
 Hotkey_SetWinEventHook(eventMin, eventMax, hmodWinEventProc, lpfnWinEventProc, idProcess, idThread, dwFlags) {
