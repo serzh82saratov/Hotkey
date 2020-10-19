@@ -2,12 +2,14 @@
 	; _________________________________________________ Hotkey library _________________________________________________
 
 /*
-	v2.07        17:04 03.08.2020
+	v2.08        16:33 19.10.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
 	About - https://autohotkey.com/boards/viewtopic.php?f=6&t=53853
 
+	+2.08
+		Hotkey_KillFocus fix for tab control
 	+2.07
 		bug fix
 	+2.06
@@ -24,6 +26,7 @@
 
 Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString = "", ByRef hEdit = "") {
 	Local M, M1, M2, GuiName, Write, hGui, hDummy, HKToStr
+	Static hGuiHwnd
 	If (Name + 0 != "" || Hotkey_ID(Name)) { 
 		Throw Exception("Hotkey add error`nName '" Name "' can not be a number, or already exists.", -1) 
 		ExitApp
@@ -38,7 +41,13 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 	Hotkey_ID(hEdit, Name), Hotkey_ID(Name, hEdit)
 	Hotkey_Value(Name, Hotkey), Hotkey_ValueText(Name, HKToStr)
 	If !Hotkey_Arr("Focus")[hGui := DllCall("GetParent", Ptr, hEdit)] {
-		Gui, %GuiName%Add, Text, xp yp wp hp Hidden hwndhDummy
+		If !hGuiHwnd {
+			S_DefaultGui := A_DefaultGui
+			Gui, New, +HwndhGuiHwnd 
+			Gui, %S_DefaultGui%:Default  
+		}
+		Gui, %hGuiHwnd%:Add, Text, x0 y0 w0 h0 Hidden hwndhDummy
+		DllCall("SetParent", "Ptr", hDummy, "Ptr", hGui)
 		Hotkey_Arr("Focus")[hGui] := hDummy
 	}
 	If Write
@@ -481,8 +490,8 @@ Hotkey_KillFocus(Name = "") {
 	If (Name = "")
 	{
 		ControlGetFocus, ControlNN, A
-		ControlGet, hFocus, Hwnd, , %ControlNN%, A
-		If Hotkey_ID(hFocus) = ""
+		ControlGet, hFocus, Hwnd, , %ControlNN%, A 
+		If (Hotkey_ID(hFocus) = "")
 			Return
 		ControlFocus, , % "ahk_id" Hotkey_Arr("Focus")[DllCall("GetParent", Ptr, hFocus)]
 	}
