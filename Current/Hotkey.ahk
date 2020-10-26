@@ -2,7 +2,7 @@
 	; _________________________________________________ Hotkey library _________________________________________________
 
 /*
-	v2.08        16:33 19.10.2020
+	v2.09        22:48 26.10.2020
 	Автор - serzh82saratov
 	Описание - http://forum.script-coding.com/viewtopic.php?id=8343
 	E-Mail: serzh82saratov@mail.ru
@@ -45,9 +45,9 @@ Hotkey_Add(ControlOption, Name, Option = "", Hotkey = "", Func = "", BindString 
 		If !hGuiHwnd {
 			S_DefaultGui := A_DefaultGui
 			Gui, New, +HwndhGuiHwnd 
-			Gui, %S_DefaultGui%:Default  
+			Gui, %S_DefaultGui%:Default
 		}
-		Gui, %hGuiHwnd%:Add, Text, x0 y0 w0 h0 Hidden hwndhDummy
+		Gui, %hGuiHwnd%:Add, Text, x0 y0 w0 h0 Hidden hwndhDummy +ReadOnly
 		DllCall("SetParent", "Ptr", hDummy, "Ptr", hGui)
 		Hotkey_Arr("Focus")[hGui] := hDummy
 	}
